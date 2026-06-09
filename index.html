@@ -29,12 +29,16 @@
     .field label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--muted); text-transform: uppercase; }
     .field select { background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 10px 14px; font-family: 'DM Sans', sans-serif; font-size: 14px; border-radius: 2px; outline: none; transition: border-color 0.2s; appearance: none; cursor: pointer; }
     .field select:focus { border-color: var(--accent); }
-    textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 16px; font-family: 'DM Sans', sans-serif; font-size: 14px; line-height: 1.7; border-radius: 2px; resize: vertical; min-height: 140px; outline: none; transition: border-color 0.2s; margin-bottom: 20px; }
+    textarea { width: 100%; background: var(--surface2); border: 1px solid var(--border); color: var(--text); padding: 16px; font-family: 'DM Sans', sans-serif; font-size: 14px; line-height: 1.7; border-radius: 2px; resize: vertical; min-height: 140px; outline: none; transition: border-color 0.2s; margin-bottom: 8px; }
     textarea:focus { border-color: var(--accent); }
     textarea::placeholder { color: var(--muted); }
-    .btn-generate { width: 100%; background: var(--accent); color: #0d0d0d; border: none; padding: 14px 32px; font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; cursor: pointer; border-radius: 2px; transition: background 0.2s, transform 0.1s; }
+    .char-counter { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-align: right; margin-bottom: 20px; letter-spacing: 1px; }
+    .btn-row { display: flex; gap: 12px; margin-bottom: 0; }
+    .btn-generate { flex: 1; background: var(--accent); color: #0d0d0d; border: none; padding: 14px 32px; font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; cursor: pointer; border-radius: 2px; transition: background 0.2s, transform 0.1s; }
     .btn-generate:hover { background: var(--accent2); }
     .btn-generate:active { transform: scale(0.99); }
+    .btn-clear { background: transparent; color: var(--muted); border: 1px solid var(--border); padding: 14px 20px; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 2px; cursor: pointer; border-radius: 2px; transition: all 0.2s; }
+    .btn-clear:hover { border-color: var(--danger); color: var(--danger); }
     #output { display: none; animation: fadeUp 0.5s ease both; }
     .output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
     .output-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; color: var(--accent); }
@@ -64,9 +68,13 @@
       .scene-card { border: 1px solid #ccc; break-inside: avoid; page-break-inside: avoid; }
       .frame-visual { background: #f0f0f0; }
       #output { display: block !important; }
+      .print-header { display: block !important; margin-bottom: 20px; }
     }
+    .print-header { display: none; font-family: 'DM Sans', sans-serif; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
+    .print-header h2 { font-size: 24px; margin-bottom: 4px; }
+    .print-header p { font-size: 12px; color: #666; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-    @media (max-width: 768px) { main { padding: 40px 20px; } header { padding: 16px 20px; } .input-row { grid-template-columns: 1fr; } .storyboard-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) { main { padding: 40px 20px; } header { padding: 16px 20px; } .input-row { grid-template-columns: 1fr; } .storyboard-grid { grid-template-columns: 1fr; } .btn-row { flex-direction: column; } }
   </style>
 </head>
 <body>
@@ -90,6 +98,9 @@
           <option value="videoclip">Videoclip</option>
           <option value="animacao">Animação</option>
           <option value="videojogo">Videojogo / Cutscene</option>
+          <option value="serie">Série TV</option>
+          <option value="curtametragem">Curta-Metragem</option>
+          <option value="institucional">Institucional</option>
         </select>
       </div>
       <div class="field">
@@ -102,14 +113,22 @@
         </select>
       </div>
     </div>
-    <textarea id="narrative" placeholder="Ex: Um astronauta acorda sozinho numa estação espacial abandonada e percebe que as mensagens de socorro que está a receber são dele próprio, enviadas do futuro..."></textarea>
-    <button class="btn-generate" onclick="generateStoryboard()">GERAR STORYBOARD</button>
+    <textarea id="narrative" placeholder="Ex: Um astronauta acorda sozinho numa estação espacial abandonada e percebe que as mensagens de socorro que está a receber são dele próprio, enviadas do futuro..." oninput="updateCounter()"></textarea>
+    <div class="char-counter"><span id="charCount">0</span> / 500 CARACTERES</div>
+    <div class="btn-row">
+      <button class="btn-generate" onclick="generateStoryboard()">GERAR STORYBOARD</button>
+      <button class="btn-clear" onclick="clearForm()">LIMPAR</button>
+    </div>
   </div>
 
   <div id="output">
+    <div class="print-header">
+      <h2 id="printTitle">STORYBOARD</h2>
+      <p id="printMeta"></p>
+    </div>
     <div class="output-header">
       <div>
-        <div class="output-title" id="outputTitle">STORYBOARD</div>
+        <div class="output-title">STORYBOARD</div>
         <div class="output-meta" id="outputMeta"></div>
       </div>
       <button class="btn-export" onclick="window.print()">EXPORTAR / IMPRIMIR</button>
@@ -130,7 +149,10 @@ var AMBIENTES = {
   publicidade: ['Estúdio com luz controlada e limpa', 'Alta chave, tons brancos e luminosos', 'Produto iluminado com luz lateral', 'Exterior limpo, céu azul saturado', 'Interior moderno, luz de design', 'Luz quente e convidativa'],
   videoclip: ['Luz neón colorida, tons vibrantes', 'Backlights com fumo, atmosfera intensa', 'Luz estroboscópica, ritmo visual', 'Exterior noturno com luzes da cidade', 'Estúdio com color gels saturados', 'Pôr do sol dramático e colorido'],
   animacao: ['Paleta de cores vivas e saturadas', 'Iluminação flat com sombras simples', 'Luz mágica com partículas brilhantes', 'Ambiente fantástico com cores irreais', 'Interior acolhedor com luz quente', 'Exterior com céu expressivo e colorido'],
-  videojogo: ['Iluminação dinâmica em tempo real', 'Ambiente pós-apocalíptico, tons desaturados', 'Dungeon com tochas e sombras longas', 'Exterior sci-fi com luz neón e fog', 'Interior de nave com luz fria e azul', 'Floresta densa com raios de luz filtrados']
+  videojogo: ['Iluminação dinâmica em tempo real', 'Ambiente pós-apocalíptico, tons desaturados', 'Dungeon com tochas e sombras longas', 'Exterior sci-fi com luz neón e fog', 'Interior de nave com luz fria e azul', 'Floresta densa com raios de luz filtrados'],
+  serie: ['Luz de estúdio controlada, tons neutros', 'Interior doméstico com luz natural', 'Exterior urbano, luz disponível', 'Close emocional com luz suave e direcional', 'Cena noturna com luz artificial quente', 'Ambiente de escritório, luz fria e flat'],
+  curtametragem: ['Luz natural disponível, estética indie', 'Contraluz expressivo, tons poéticos', 'Interior minimalista com sombras longas', 'Exterior ao amanhecer, cores frias e puras', 'Luz de janela única, alto contraste', 'Noturno urbano com luzes de néon suaves'],
+  institucional: ['Luz de estúdio limpa e profissional', 'Exterior corporativo, luz natural controlada', 'Interior moderno com luz fria e clara', 'Entrevista com luz de três pontos clássica', 'Produto ou serviço em destaque, luz lateral', 'Espaço de trabalho com luz ambiente natural']
 };
 
 var SCENE_STRUCTURES = {
@@ -181,6 +203,30 @@ var SCENE_STRUCTURES = {
     { role: 'acao', shotBias: [1, 2], moveBias: [8, 5], transBias: [0, 3], durBias: [1, 2] },
     { role: 'confronto', shotBias: [2, 5], moveBias: [6, 8], transBias: [3, 0], durBias: [1, 3] },
     { role: 'desfecho', shotBias: [0, 1], moveBias: [7, 4], transBias: [1, 4], durBias: [3, 5] }
+  ],
+  serie: [
+    { role: 'abertura', shotBias: [0, 1], moveBias: [0, 5], transBias: [0, 2], durBias: [3, 5] },
+    { role: 'apresentacao', shotBias: [1, 2], moveBias: [0, 6], transBias: [0, 3], durBias: [2, 4] },
+    { role: 'desenvolvimento', shotBias: [1, 2], moveBias: [5, 0], transBias: [0, 3], durBias: [2, 4] },
+    { role: 'tensao', shotBias: [2, 3], moveBias: [6, 0], transBias: [3, 0], durBias: [1, 3] },
+    { role: 'climax', shotBias: [2, 5], moveBias: [6, 8], transBias: [0, 3], durBias: [1, 3] },
+    { role: 'resolucao', shotBias: [0, 1], moveBias: [0, 7], transBias: [1, 4], durBias: [4, 6] }
+  ],
+  curtametragem: [
+    { role: 'abertura', shotBias: [0, 4], moveBias: [5, 0], transBias: [0, 2], durBias: [4, 6] },
+    { role: 'apresentacao', shotBias: [2, 1], moveBias: [0, 9], transBias: [2, 0], durBias: [3, 5] },
+    { role: 'tensao', shotBias: [3, 2], moveBias: [6, 0], transBias: [0, 3], durBias: [2, 4] },
+    { role: 'climax', shotBias: [2, 5], moveBias: [8, 6], transBias: [0, 3], durBias: [1, 2] },
+    { role: 'resolucao', shotBias: [0, 1], moveBias: [7, 0], transBias: [1, 4], durBias: [5, 7] },
+    { role: 'resolucao', shotBias: [3, 0], moveBias: [0, 4], transBias: [4, 1], durBias: [5, 7] }
+  ],
+  institucional: [
+    { role: 'contexto', shotBias: [0, 6], moveBias: [0, 1], transBias: [0, 2], durBias: [4, 6] },
+    { role: 'sujeito', shotBias: [1, 2], moveBias: [0, 9], transBias: [0, 2], durBias: [3, 5] },
+    { role: 'produto', shotBias: [3, 1], moveBias: [9, 0], transBias: [0, 2], durBias: [2, 4] },
+    { role: 'beneficio', shotBias: [1, 2], moveBias: [5, 0], transBias: [0, 3], durBias: [2, 3] },
+    { role: 'emocao', shotBias: [2, 1], moveBias: [0, 6], transBias: [2, 0], durBias: [2, 3] },
+    { role: 'cta', shotBias: [3, 0], moveBias: [7, 0], transBias: [4, 1], durBias: [2, 4] }
   ]
 };
 
@@ -206,7 +252,6 @@ var SCENE_TITLES = {
   intro: ['Intro', 'O Ambiente', 'Abertura', 'O Palco'],
   performance: ['Performance', 'No Palco', 'A Atuação', 'O Artista'],
   narrativa: ['A História', 'Narrativa', 'O Momento', 'A Cena'],
-  climaxV: ['Clímax', 'O Pico', 'Momento Máximo', 'Intensidade'],
   final: ['Final', 'O Encerramento', 'Último Frame', 'Saída'],
   mundo: ['O Mundo', 'Universo', 'O Cenário', 'Onde Tudo Começa'],
   personagem: ['O Herói', 'A Personagem', 'Protagonista', 'O Eleito'],
@@ -217,9 +262,20 @@ var SCENE_TITLES = {
   desfecho: ['Desfecho', 'Vitória', 'O Fim', 'Após a Batalha']
 };
 
-function pick(arr) {
-  return arr[Math.floor(Math.random() * arr.length)];
+function updateCounter() {
+  var val = document.getElementById('narrative').value;
+  document.getElementById('charCount').textContent = val.length;
 }
+
+function clearForm() {
+  document.getElementById('narrative').value = '';
+  document.getElementById('charCount').textContent = '0';
+  document.getElementById('genre').selectedIndex = 0;
+  document.getElementById('numScenes').selectedIndex = 1;
+  document.getElementById('output').style.display = 'none';
+}
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
 
 function pickBias(arr, biasIndices) {
   if (Math.random() < 0.7 && biasIndices && biasIndices.length > 0) {
@@ -234,18 +290,13 @@ function extractKeywords(text) {
     hasAction: /luta|guerra|combate|correr|fugir|perseguição|explosão|ataque|batalha/.test(lower),
     hasMystery: /mistério|segredo|descobrir|esconder|sombra|oculto|revelação|investigar/.test(lower),
     hasEmotion: /amor|saudade|tristeza|alegria|medo|emoção|sentimento|chorar|sorrir/.test(lower),
-    hasNature: /floresta|mar|montanha|natureza|campo|céu|rio|praia|vento/.test(lower),
-    hasUrban: /cidade|rua|prédio|carro|metro|multidão|café|escola|hospital/.test(lower),
-    hasScifi: /espaço|robô|futuro|tecnologia|nave|planeta|astronauta|digital|virtual/.test(lower),
-    sentenceCount: text.split(/[.!?]+/).filter(function(s) { return s.trim().length > 0; }).length
+    hasScifi: /espaço|robô|futuro|tecnologia|nave|planeta|astronauta|digital|virtual/.test(lower)
   };
 }
 
 function generateDescription(keywords, role, genre, sceneIndex, totalScenes) {
-  var progress = sceneIndex / (totalScenes - 1);
   var descriptions = [];
-
-  if (genre === 'cinematografico' || genre === 'animacao' || genre === 'videojogo') {
+  if (genre === 'cinematografico' || genre === 'serie' || genre === 'curtametragem') {
     if (keywords.hasScifi) {
       descriptions = [
         'A câmara percorre lentamente o corredor metálico, revelando painéis com luzes intermitentes e ecos distantes.',
@@ -283,7 +334,7 @@ function generateDescription(keywords, role, genre, sceneIndex, totalScenes) {
         'Enquadramento final que encerra visualmente a sequência, composição simétrica e estável.'
       ];
     }
-  } else if (genre === 'documental') {
+  } else if (genre === 'documental' || genre === 'institucional') {
     descriptions = [
       'Câmara de mão capta o ambiente com naturalidade, luz disponível, sem encenação visível.',
       'Entrevistado em plano médio ligeiramente lateral, fundo desfocado, olhar para fora do eixo.',
@@ -294,24 +345,32 @@ function generateDescription(keywords, role, genre, sceneIndex, totalScenes) {
     ];
   } else if (genre === 'publicidade') {
     descriptions = [
-      'Produto em destaque com iluminação de produto profissional, fundo limpo e composição cuidada.',
-      'Consumidor feliz em plano médio, luz alta e expressão genuína de satisfação e entusiasmo.',
-      'Detalhe do produto em macro, texturas e acabamento visíveis, câmara lenta valoriza a qualidade.',
-      'Lifestyle shot com o produto integrado naturalmente na vida quotidiana do utilizador.',
+      'Produto em destaque com iluminação profissional, fundo limpo e composição cuidada.',
+      'Consumidor feliz em plano médio, luz alta e expressão genuína de satisfação.',
+      'Detalhe do produto em macro, texturas visíveis, câmara lenta valoriza a qualidade.',
+      'Lifestyle shot com o produto integrado naturalmente na vida quotidiana.',
       'Logótipo e assinatura da marca em plano final limpo, fundo neutro, tipografia destacada.',
-      'Comparação visual clara que demonstra o benefício principal, composição dividida em dois.'
+      'Comparação visual que demonstra o benefício principal, composição clara e direta.'
     ];
   } else if (genre === 'videoclip') {
     descriptions = [
-      'Artista em plano americano, câmara ligeiramente baixa valoriza a presença e o poder visual.',
+      'Artista em plano americano, câmara ligeiramente baixa valoriza a presença visual.',
       'Corte rápido sincronizado com o ritmo, câmara de mão capta a energia da performance.',
-      'Plano de conjunto no palco ou locação, movimento de câmara amplo acompanha a coreografia.',
+      'Plano de conjunto no palco, movimento de câmara amplo acompanha a coreografia.',
       'Close no rosto do artista durante nota emotiva, iluminação dramática com sombras definidas.',
-      'Detalhe de mãos no instrumento ou microfone, câmara lenta a 120fps realça o gesto.',
-      'Plano final com câmara recuando lentamente, artista no centro do enquadramento, fade gradual.'
+      'Detalhe de mãos no instrumento, câmara lenta realça o gesto musical.',
+      'Plano final com câmara recuando, artista no centro do enquadramento, fade gradual.'
+    ];
+  } else {
+    descriptions = [
+      'A câmara abre com um plano estabelecedor que contextualiza o ambiente narrativo.',
+      'Plano médio da personagem principal, expressão facial comunica o estado emocional.',
+      'Close que isola o detalhe mais importante da cena, criando foco narrativo.',
+      'Câmara acompanha o movimento em travelling suave, mantendo distância dramática.',
+      'Plano de conjunto que posiciona os elementos no espaço, dinâmica visual equilibrada.',
+      'Enquadramento final que encerra visualmente a sequência, composição estável.'
     ];
   }
-
   var idx = Math.min(sceneIndex, descriptions.length - 1);
   return descriptions[idx] || descriptions[0];
 }
@@ -321,42 +380,34 @@ function generateStoryboard() {
   var genre = document.getElementById('genre').value;
   var numScenes = parseInt(document.getElementById('numScenes').value);
 
-  if (!narrative) {
-    alert('Escreve uma narrativa primeiro.');
-    return;
-  }
+  if (!narrative) { alert('Escreve uma narrativa primeiro.'); return; }
 
   var keywords = extractKeywords(narrative);
   var structures = SCENE_STRUCTURES[genre] || SCENE_STRUCTURES['cinematografico'];
   var ambientes = AMBIENTES[genre] || AMBIENTES['cinematografico'];
-  var genreLabels = { cinematografico: 'CINEMATOGRÁFICO', documental: 'DOCUMENTAL', publicidade: 'PUBLICIDADE', videoclip: 'VIDEOCLIP', animacao: 'ANIMAÇÃO', videojogo: 'VIDEOJOGO' };
+  var genreLabels = {
+    cinematografico: 'CINEMATOGRÁFICO', documental: 'DOCUMENTAL', publicidade: 'PUBLICIDADE',
+    videoclip: 'VIDEOCLIP', animacao: 'ANIMAÇÃO', videojogo: 'VIDEOJOGO',
+    serie: 'SÉRIE TV', curtametragem: 'CURTA-METRAGEM', institucional: 'INSTITUCIONAL'
+  };
 
   var cenas = [];
   for (var i = 0; i < numScenes; i++) {
     var structIdx = Math.floor((i / numScenes) * structures.length);
     var struct = structures[structIdx] || structures[structures.length - 1];
-    var shotType = pickBias(SHOT_TYPES, struct.shotBias);
-    var cameraMove = pickBias(CAMERA_MOVES, struct.moveBias);
-    var transition = pickBias(TRANSITIONS, struct.transBias);
-    var duration = pickBias(DURATIONS, struct.durBias);
-    var ambiente = ambientes[i % ambientes.length];
-    var titleOptions = SCENE_TITLES[struct.role] || ['Cena ' + (i + 1)];
-    var title = pick(titleOptions);
-    var description = generateDescription(keywords, struct.role, genre, i, numScenes);
-
     cenas.push({
       numero: i + 1,
-      titulo: title,
-      descricao: description,
-      tipo_plano: shotType,
-      movimento_camara: cameraMove,
-      transicao: transition,
-      duracao: duration,
-      ambiente: ambiente
+      titulo: pick(SCENE_TITLES[struct.role] || ['Cena ' + (i + 1)]),
+      descricao: generateDescription(keywords, struct.role, genre, i, numScenes),
+      tipo_plano: pickBias(SHOT_TYPES, struct.shotBias),
+      movimento_camara: pickBias(CAMERA_MOVES, struct.moveBias),
+      transicao: pickBias(TRANSITIONS, struct.transBias),
+      duracao: pickBias(DURATIONS, struct.durBias),
+      ambiente: ambientes[i % ambientes.length]
     });
   }
 
-  renderStoryboard({ titulo: narrative.substring(0, 40) + (narrative.length > 40 ? '...' : ''), cenas: cenas }, genre, genreLabels[genre]);
+  renderStoryboard({ cenas: cenas }, genre, genreLabels[genre], narrative);
 }
 
 var shotSVGs = {
@@ -374,15 +425,16 @@ function getSVGForScene(shotType) {
   return shotSVGs[shotType] || shotSVGs['Plano Médio'];
 }
 
-function renderStoryboard(data, genre, genreLabel) {
+function renderStoryboard(data, genre, genreLabel, narrative) {
   var grid = document.getElementById('storyboardGrid');
   var output = document.getElementById('output');
   var meta = document.getElementById('outputMeta');
-  var title = document.getElementById('outputTitle');
+  var dateStr = new Date().toLocaleDateString('pt-PT');
 
   grid.innerHTML = '';
-  title.textContent = 'STORYBOARD';
-  meta.textContent = data.cenas.length + ' CENAS · ' + genreLabel + ' · ' + new Date().toLocaleDateString('pt-PT');
+  meta.textContent = data.cenas.length + ' CENAS · ' + genreLabel + ' · ' + dateStr;
+  document.getElementById('printTitle').textContent = narrative.substring(0, 60) + (narrative.length > 60 ? '...' : '');
+  document.getElementById('printMeta').textContent = data.cenas.length + ' cenas · ' + genreLabel + ' · ' + dateStr;
 
   data.cenas.forEach(function(cena, i) {
     var card = document.createElement('div');
@@ -413,3 +465,4 @@ function renderStoryboard(data, genre, genreLabel) {
 </script>
 </body>
 </html>
+
