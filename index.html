@@ -33,7 +33,7 @@
     textarea:focus { border-color: var(--accent); }
     textarea::placeholder { color: var(--muted); }
     .char-counter { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-align: right; margin-bottom: 20px; letter-spacing: 1px; }
-    .btn-row { display: flex; gap: 12px; margin-bottom: 0; }
+    .btn-row { display: flex; gap: 12px; }
     .btn-generate { flex: 1; background: var(--accent); color: #0d0d0d; border: none; padding: 14px 32px; font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; cursor: pointer; border-radius: 2px; transition: background 0.2s, transform 0.1s; }
     .btn-generate:hover { background: var(--accent2); }
     .btn-generate:active { transform: scale(0.99); }
@@ -68,11 +68,11 @@
       .scene-card { border: 1px solid #ccc; break-inside: avoid; page-break-inside: avoid; }
       .frame-visual { background: #f0f0f0; }
       #output { display: block !important; }
-      .print-header { display: block !important; margin-bottom: 20px; }
+      .print-header { display: block !important; margin-bottom: 24px; }
     }
-    .print-header { display: none; font-family: 'DM Sans', sans-serif; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px; }
-    .print-header h2 { font-size: 24px; margin-bottom: 4px; }
-    .print-header p { font-size: 12px; color: #666; }
+    .print-header { display: none; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 24px; }
+    .print-header h2 { font-size: 28px; margin-bottom: 4px; font-family: sans-serif; }
+    .print-header p { font-size: 12px; color: #666; font-family: sans-serif; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
     @media (max-width: 768px) { main { padding: 40px 20px; } header { padding: 16px 20px; } .input-row { grid-template-columns: 1fr; } .storyboard-grid { grid-template-columns: 1fr; } .btn-row { flex-direction: column; } }
   </style>
@@ -120,7 +120,6 @@
       <button class="btn-clear" onclick="clearForm()">LIMPAR</button>
     </div>
   </div>
-
   <div id="output">
     <div class="print-header">
       <h2 id="printTitle">STORYBOARD</h2>
@@ -136,7 +135,6 @@
     <div class="storyboard-grid" id="storyboardGrid"></div>
   </div>
 </main>
-
 <script>
 var SHOT_TYPES = ['Plano Geral', 'Plano Médio', 'Grande Plano', 'Plano Detalhe', 'Plano Picado', 'Plano Contrapicado', 'Plano Americano', 'Plano Sequência'];
 var CAMERA_MOVES = ['Fixo', 'Pan Direita', 'Pan Esquerda', 'Tilt Up', 'Tilt Down', 'Travelling', 'Zoom In', 'Zoom Out', 'Dolly', 'Steadicam'];
@@ -144,15 +142,15 @@ var TRANSITIONS = ['Corte', 'Fade', 'Dissolve', 'Corte Seco', 'Fade to Black', '
 var DURATIONS = ['2s', '3s', '4s', '5s', '6s', '8s', '10s', '12s'];
 
 var AMBIENTES = {
-  cinematografico: ['Luz natural difusa, tons frios', 'Contraluz dramático, silhuetas fortes', 'Interior com luz baixa e sombras profundas', 'Exterior dourado, hora mágica', 'Luz artificial dura, contraste elevado', 'Neblina suave, profundidade reduzida'],
-  documental: ['Luz natural disponível, tons neutros', 'Interior com luz ambiente, realista', 'Exterior com céu nublado, luz flat', 'Luz de janela suave e direcional', 'Ambiente urbano, luzes mistas', 'Campo aberto, luz solar direta'],
-  publicidade: ['Estúdio com luz controlada e limpa', 'Alta chave, tons brancos e luminosos', 'Produto iluminado com luz lateral', 'Exterior limpo, céu azul saturado', 'Interior moderno, luz de design', 'Luz quente e convidativa'],
-  videoclip: ['Luz neón colorida, tons vibrantes', 'Backlights com fumo, atmosfera intensa', 'Luz estroboscópica, ritmo visual', 'Exterior noturno com luzes da cidade', 'Estúdio com color gels saturados', 'Pôr do sol dramático e colorido'],
-  animacao: ['Paleta de cores vivas e saturadas', 'Iluminação flat com sombras simples', 'Luz mágica com partículas brilhantes', 'Ambiente fantástico com cores irreais', 'Interior acolhedor com luz quente', 'Exterior com céu expressivo e colorido'],
-  videojogo: ['Iluminação dinâmica em tempo real', 'Ambiente pós-apocalíptico, tons desaturados', 'Dungeon com tochas e sombras longas', 'Exterior sci-fi com luz neón e fog', 'Interior de nave com luz fria e azul', 'Floresta densa com raios de luz filtrados'],
-  serie: ['Luz de estúdio controlada, tons neutros', 'Interior doméstico com luz natural', 'Exterior urbano, luz disponível', 'Close emocional com luz suave e direcional', 'Cena noturna com luz artificial quente', 'Ambiente de escritório, luz fria e flat'],
-  curtametragem: ['Luz natural disponível, estética indie', 'Contraluz expressivo, tons poéticos', 'Interior minimalista com sombras longas', 'Exterior ao amanhecer, cores frias e puras', 'Luz de janela única, alto contraste', 'Noturno urbano com luzes de néon suaves'],
-  institucional: ['Luz de estúdio limpa e profissional', 'Exterior corporativo, luz natural controlada', 'Interior moderno com luz fria e clara', 'Entrevista com luz de três pontos clássica', 'Produto ou serviço em destaque, luz lateral', 'Espaço de trabalho com luz ambiente natural']
+  cinematografico: ['Luz natural difusa, tons frios', 'Contraluz dramático, silhuetas fortes', 'Interior com luz baixa e sombras profundas', 'Exterior dourado, hora mágica', 'Luz artificial dura, contraste elevado', 'Neblina suave, profundidade reduzida', 'Chuva suave, reflexos no pavimento', 'Amanhecer com cores quentes e névoa', 'Interior noturno com vela como única fonte de luz', 'Exterior com tempestade aproximando-se'],
+  documental: ['Luz natural disponível, tons neutros', 'Interior com luz ambiente, realista', 'Exterior com céu nublado, luz flat', 'Luz de janela suave e direcional', 'Ambiente urbano, luzes mistas', 'Campo aberto, luz solar direta', 'Mercado movimentado, luz natural intensa', 'Corredor hospitalar, luz fria e fria', 'Sala de reunião com luz de escritório', 'Exterior ao entardecer, última hora de luz'],
+  publicidade: ['Estúdio com luz controlada e limpa', 'Alta chave, tons brancos e luminosos', 'Produto iluminado com luz lateral', 'Exterior limpo, céu azul saturado', 'Interior moderno, luz de design', 'Luz quente e convidativa', 'Pôr do sol com tons alaranjados e dourados', 'Estúdio minimalista, fundo branco', 'Cozinha moderna com luz natural abundante', 'Exterior com bokeh suave e cores vibrantes'],
+  videoclip: ['Luz neón colorida, tons vibrantes', 'Backlights com fumo, atmosfera intensa', 'Luz estroboscópica, ritmo visual', 'Exterior noturno com luzes da cidade', 'Estúdio com color gels saturados', 'Pôr do sol dramático e colorido', 'Chuva com iluminação néon refletida', 'Interior industrial com luz pontual dramática', 'Deserto ao amanhecer com tons pastel', 'Telhado noturno com cidade iluminada ao fundo'],
+  animacao: ['Paleta de cores vivas e saturadas', 'Iluminação flat com sombras simples', 'Luz mágica com partículas brilhantes', 'Ambiente fantástico com cores irreais', 'Interior acolhedor com luz quente', 'Exterior com céu expressivo e colorido', 'Floresta encantada com luz filtrada pelas árvores', 'Castelo sombrio com raios de luz dramáticos', 'Underwater com luz difusa e tons azuis', 'Dimensão alternativa com paleta surreal'],
+  videojogo: ['Iluminação dinâmica em tempo real', 'Ambiente pós-apocalíptico, tons desaturados', 'Dungeon com tochas e sombras longas', 'Exterior sci-fi com luz neón e fog', 'Interior de nave com luz fria e azul', 'Floresta densa com raios de luz filtrados', 'Arena de combate com spotlights dramáticos', 'Cidade cyberpunk à noite com néon refletido', 'Ruínas antigas com luz solar lateral', 'Base inimiga com iluminação vermelha de alerta'],
+  serie: ['Luz de estúdio controlada, tons neutros', 'Interior doméstico com luz natural', 'Exterior urbano, luz disponível', 'Close emocional com luz suave e direcional', 'Cena noturna com luz artificial quente', 'Ambiente de escritório, luz fria e flat', 'Bar ou restaurante com luz ambiente quente', 'Hospital com luz fria e asséptica', 'Exterior suburban ao final do dia', 'Interior de carro com luz de rua refletida'],
+  curtametragem: ['Luz natural disponível, estética indie', 'Contraluz expressivo, tons poéticos', 'Interior minimalista com sombras longas', 'Exterior ao amanhecer, cores frias e puras', 'Luz de janela única, alto contraste', 'Noturno urbano com luzes de néon suaves', 'Praia ao entardecer com luz rasante', 'Interior abandonado com luz entrando pelas fissuras', 'Floresta com luz filtrada e partículas de pó', 'Telhado urbano ao pôr do sol'],
+  institucional: ['Luz de estúdio limpa e profissional', 'Exterior corporativo, luz natural controlada', 'Interior moderno com luz fria e clara', 'Entrevista com luz de três pontos clássica', 'Produto ou serviço em destaque, luz lateral', 'Espaço de trabalho com luz ambiente natural', 'Sala de conferências com luz neutra', 'Exterior de edifício corporativo, luz de dia', 'Laboratório ou espaço técnico com luz branca', 'Evento ou apresentação com luz de palco']
 };
 
 var SCENE_STRUCTURES = {
@@ -218,7 +216,7 @@ var SCENE_STRUCTURES = {
     { role: 'tensao', shotBias: [3, 2], moveBias: [6, 0], transBias: [0, 3], durBias: [2, 4] },
     { role: 'climax', shotBias: [2, 5], moveBias: [8, 6], transBias: [0, 3], durBias: [1, 2] },
     { role: 'resolucao', shotBias: [0, 1], moveBias: [7, 0], transBias: [1, 4], durBias: [5, 7] },
-    { role: 'resolucao', shotBias: [3, 0], moveBias: [0, 4], transBias: [4, 1], durBias: [5, 7] }
+    { role: 'conclusao', shotBias: [3, 0], moveBias: [0, 4], transBias: [4, 1], durBias: [5, 7] }
   ],
   institucional: [
     { role: 'contexto', shotBias: [0, 6], moveBias: [0, 1], transBias: [0, 2], durBias: [4, 6] },
@@ -262,6 +260,154 @@ var SCENE_TITLES = {
   desfecho: ['Desfecho', 'Vitória', 'O Fim', 'Após a Batalha']
 };
 
+// Descrições por género — 10 por cada para não repetir
+var DESCRIPTIONS = {
+  cinematografico_scifi: [
+    'A câmara percorre lentamente o corredor metálico, revelando painéis com luzes intermitentes e ecos distantes.',
+    'Um close ao rosto do protagonista enquanto os olhos fixam um ponto fora do ecrã, expressão tensa e concentrada.',
+    'Plano geral que revela a imensidão do ambiente, destacando a pequenez da personagem no espaço.',
+    'Detalhes de equipamento tecnológico em primeiro plano, desfocando o movimento ao fundo.',
+    'A personagem estende a mão para algo fora do enquadramento, câmara acompanha o gesto lentamente.',
+    'Corte rápido para um visor holográfico com dados em movimento, refletindo nos olhos da personagem.',
+    'Travelling lento acompanha a personagem por um túnel iluminado apenas por luz azul fria e pulsante.',
+    'Plano detalhe de um painel de controlo com alertas vermelhos piscando, mãos hesitam antes de agir.',
+    'Grande plano do rosto em perfil, luz lateral dura cria sombra profunda na metade escura do rosto.',
+    'Câmara recua lentamente revelando uma janela com o vazio do espaço ao fundo, silhueta em contraluz.'
+  ],
+  cinematografico_action: [
+    'Câmara em movimento rápido acompanha a personagem em plano americano, fundo em blur cinético.',
+    'Corte brusco para grande plano do rosto, suor visível, respiração acelerada, tensão máxima.',
+    'Plano de conjunto capta o ambiente caótico, câmara trêmula adiciona urgência à cena.',
+    'Detalhe de mãos segurando algo com força, plano fechado e foco nítido no objeto.',
+    'Câmara baixa, contrapicado dramático, personagem ocupa o frame com presença dominante.',
+    'Plano geral revela a escala do confronto, pequenas figuras contra um cenário grandioso.',
+    'Slow motion captura o momento de impacto, cada detalhe amplificado pela velocidade reduzida.',
+    'Câmara circular a 360 graus em torno da personagem, ambiente desfocado em movimento.',
+    'Plano sequência sem cortes acompanha a ação de ponta a ponta, câmara nunca para.',
+    'Close rápido nos olhos seguido de corte seco para o objeto de foco da personagem.'
+  ],
+  cinematografico_mystery: [
+    'A câmara avança lentamente por um corredor escuro, luz fraca ao fundo criando profundidade de campo.',
+    'Grande plano de um objeto misterioso iluminado por um único feixe de luz, sombras pesadas à volta.',
+    'O protagonista para e olha para trás, câmara fixa capta a hesitação no momento.',
+    'Plano detalhe de uma pista ou objeto, câmara faz rack focus revelando contexto ao fundo.',
+    'Silhueta da personagem contra uma janela iluminada, identidade obscurecida intencionalmente.',
+    'Câmara recua lentamente, revelando progressivamente o espaço ao redor da personagem isolada.',
+    'Reflexo na superfície brilhante revela algo que a personagem ainda não viu, câmara fixa.',
+    'Travelling lateral lento pelo espaço, câmara descobre pistas visuais ao longo do percurso.',
+    'Plano picado sobre a personagem que examina algo no chão, ângulo cria sensação de vulnerabilidade.',
+    'Foco suave no fundo onde algo se move, personagem em primeiro plano ainda não percebeu.'
+  ],
+  cinematografico_default: [
+    'A câmara abre com um plano estabelecedor que contextualiza o ambiente narrativo da cena.',
+    'Plano médio da personagem principal em ação, expressão facial comunica o estado emocional.',
+    'Close progressivo que isola o detalhe mais importante da cena, criando foco narrativo.',
+    'Câmara acompanha o movimento da personagem em travelling suave, mantendo distância dramática.',
+    'Plano de conjunto que posiciona as personagens no espaço, dinâmica visual equilibrada.',
+    'Enquadramento final que encerra visualmente a sequência, composição simétrica e estável.',
+    'Câmara fixa observa a cena sem intervir, personagem age com naturalidade no espaço.',
+    'Plano contrapicado valoriza a presença da personagem, céu ou teto como fundo.',
+    'Dissolve suave transporta entre dois momentos temporais distintos, ligação emocional mantida.',
+    'Grande plano capta micro-expressão decisiva, momento de realização ou mudança interior.'
+  ],
+  documental: [
+    'Câmara de mão capta o ambiente com naturalidade, luz disponível, sem encenação visível.',
+    'Entrevistado em plano médio ligeiramente lateral, fundo desfocado, olhar para fora do eixo.',
+    'Plano detalhe de mãos em movimento, trabalho ou gesto que complementa o discurso oral.',
+    'Plano geral do espaço captado em movimento lento, câmara explora o ambiente sem cortes.',
+    'Close no rosto durante momento de emoção ou revelação, câmara mantém distância respeitosa.',
+    'Plano de conjunto que enquadra o sujeito no seu contexto natural, relação figura-fundo clara.',
+    'Câmara segue o sujeito em movimento, plano de acompanhamento discreto e não intrusivo.',
+    'Plano inserção mostra objeto ou local referido no discurso, corte sem quebra de continuidade.',
+    'Entrevistado ouve antes de responder, câmara capta a pausa e a reflexão genuína.',
+    'Plano geral final com sujeito a distância no seu ambiente, câmara recua para encerrar.'
+  ],
+  publicidade: [
+    'Produto em destaque com iluminação profissional, fundo limpo e composição cuidada.',
+    'Consumidor feliz em plano médio, luz alta e expressão genuína de satisfação.',
+    'Detalhe do produto em macro, texturas visíveis, câmara lenta valoriza a qualidade.',
+    'Lifestyle shot com o produto integrado naturalmente na vida quotidiana.',
+    'Logótipo e assinatura da marca em plano final limpo, fundo neutro, tipografia destacada.',
+    'Comparação visual que demonstra o benefício principal, composição clara e direta.',
+    'Mão segura o produto com cuidado, câmara faz orbit suave revelando todos os ângulos.',
+    'Plano de grupo feliz em contexto de uso, produto presente mas não intrusivo.',
+    'Câmara lenta capta momento de uso do produto, expressão de prazer ou satisfação.',
+    'Texto e produto em composição gráfica limpa, identidade visual da marca no centro.'
+  ],
+  videoclip: [
+    'Artista em plano americano, câmara ligeiramente baixa valoriza a presença visual.',
+    'Corte rápido sincronizado com o ritmo, câmara de mão capta a energia da performance.',
+    'Plano de conjunto no palco, movimento de câmara amplo acompanha a coreografia.',
+    'Close no rosto do artista durante nota emotiva, iluminação dramática com sombras definidas.',
+    'Detalhe de mãos no instrumento, câmara lenta realça o gesto musical.',
+    'Plano final com câmara recuando, artista no centro do enquadramento, fade gradual.',
+    'Câmara circular em torno do artista em performance, luzes criam padrões dinâmicos.',
+    'Corte sincronizado com batida forte, novo ângulo a cada impacto musical.',
+    'Plano picado sobre a multidão ou coreografia, vista aérea revela padrão visual.',
+    'Artista olha diretamente para a câmara num momento íntimo, quebra da quarta parede.'
+  ],
+  animacao: [
+    'A câmara abre o mundo animado com um plano panorâmico cheio de cor e detalhe.',
+    'A personagem é introduzida num momento característico que define a sua personalidade.',
+    'Sequência de ação com câmara dinâmica, enquadramentos exagerados para impacto visual.',
+    'Expressão facial amplificada revela estado emocional de forma clara e expressiva.',
+    'Descoberta de algo novo, câmara acompanha o olhar da personagem com curiosidade.',
+    'Resolução com plano amplo que mostra a transformação do mundo ou da personagem.',
+    'Travelling rápido através do cenário, detalhes do mundo surgem progressivamente.',
+    'Close extremo em detalhe expressivo, olho, mão ou objeto com significado simbólico.',
+    'Personagens em interação, câmara alterna entre rostos capturando a dinâmica emocional.',
+    'Plano final poético com câmara afastando-se, personagem pequena num mundo vasto.'
+  ],
+  videojogo: [
+    'Câmara estabelece o ambiente de jogo com plano panorâmico e atmosfera épica.',
+    'Personagem principal é apresentada em pose heroica, ângulo contrapicado impõe presença.',
+    'Mapa ou objetivo é revelado com câmara overhead, estratégia visual clara.',
+    'Sequência de combate com câmara rápida e cortes agressivos sincronizados com ações.',
+    'Momento de confronto com antagonista, câmara baixa aumenta tensão e escala.',
+    'Desfecho épico com câmara recuando para revelar escala total do acontecimento.',
+    'Personagem examina o ambiente, câmara segue o olhar descobrindo pistas ou segredos.',
+    'Cutscene cinemática com iluminação dramática e enquadramento de filme de ação.',
+    'Plano detalhe de equipamento, arma ou objeto crucial para a narrativa do jogo.',
+    'Câmara fixa capta reação da personagem a revelação importante, micro-expressão visível.'
+  ],
+  serie: [
+    'Cena de abertura estabelece o tom e o ambiente da série com plano amplo e musical.',
+    'Personagem principal em ambiente doméstico ou de trabalho, rotina e carácter revelados.',
+    'Diálogo em plano e contraplano, câmara alterna entre personagens com ritmo natural.',
+    'Momento de tensão ou conflito, câmara aproxima-se progressivamente dos rostos.',
+    'Clímax do episódio com revelação ou confronto, câmara fixa capta o impacto emocional.',
+    'Cena final do episódio deixa questão em aberto, plano afasta-se para criar suspense.',
+    'Flashback ou memória com tratamento visual distinto, granulado ou saturação diferente.',
+    'Cena de grupo em espaço comum, câmara regista dinâmica entre personagens.',
+    'Momento íntimo e silencioso, câmara respeitosa mantém distância emocional adequada.',
+    'Plano final de episódio, personagem sozinha a processar acontecimentos, câmara estática.'
+  ],
+  curtametragem: [
+    'Abertura poética sem diálogo, câmara observa o ambiente com atenção ao detalhe.',
+    'Personagem apresentada através de ação, quem é revelado pelo que faz, não pelo que diz.',
+    'Tensão construída com silêncio e planos fixos, o não-dito pesa mais que as palavras.',
+    'Momento decisivo captado em plano longo sem corte, câmara testemunha sem interferir.',
+    'Resolução ambígua, câmara afasta-se sem revelar completamente o desenlace.',
+    'Último plano com composição cuidada e simbolismo visual que encerra a narrativa.',
+    'Câmara subjetiva coloca o espectador na perspetiva da personagem num momento chave.',
+    'Detalhe significativo que une o início ao fim, motivo visual recorrente com novo sentido.',
+    'Plano sequência sem cortes que acompanha uma ação completa de início ao fim.',
+    'Close final no rosto da personagem, expressão ambígua convida à interpretação pessoal.'
+  ],
+  institucional: [
+    'Plano de abertura apresenta a organização com imagem corporativa forte e positiva.',
+    'Porta-voz ou representante em entrevista, postura confiante e luz profissional.',
+    'Produto ou serviço em contexto de uso real, benefício demonstrado naturalmente.',
+    'Equipa em ação num ambiente de trabalho dinâmico, colaboração e competência visíveis.',
+    'Depoimento de cliente ou parceiro, plano médio com fundo desfocado e luz quente.',
+    'Plano final com logótipo e mensagem chave, composição limpa e profissional.',
+    'Instalações ou infraestrutura em travelling suave, escala e capacidade comunicadas.',
+    'Processo de trabalho ou produção em time-lapse, eficiência e rigor demonstrados.',
+    'Direção ou liderança em contexto natural de trabalho, autoridade comunicada sem arrogância.',
+    'Chamada à ação final com contacto ou URL, tipografia clara sobre fundo institucional.'
+  ]
+};
+
 function updateCounter() {
   var val = document.getElementById('narrative').value;
   document.getElementById('charCount').textContent = val.length;
@@ -287,92 +433,26 @@ function pickBias(arr, biasIndices) {
 function extractKeywords(text) {
   var lower = text.toLowerCase();
   return {
-    hasAction: /luta|guerra|combate|correr|fugir|perseguição|explosão|ataque|batalha/.test(lower),
-    hasMystery: /mistério|segredo|descobrir|esconder|sombra|oculto|revelação|investigar/.test(lower),
-    hasEmotion: /amor|saudade|tristeza|alegria|medo|emoção|sentimento|chorar|sorrir/.test(lower),
-    hasScifi: /espaço|robô|futuro|tecnologia|nave|planeta|astronauta|digital|virtual/.test(lower)
+    hasAction: /luta|guerra|combate|correr|fugir|perseguição|explosão|ataque|batalha|corrida/.test(lower),
+    hasMystery: /mistério|segredo|descobrir|esconder|sombra|oculto|revelação|investigar|detetive|carta/.test(lower),
+    hasScifi: /espaço|robô|futuro|tecnologia|nave|planeta|astronauta|digital|virtual|holograma/. test(lower)
   };
 }
 
-function generateDescription(keywords, role, genre, sceneIndex, totalScenes) {
-  var descriptions = [];
-  if (genre === 'cinematografico' || genre === 'serie' || genre === 'curtametragem') {
-    if (keywords.hasScifi) {
-      descriptions = [
-        'A câmara percorre lentamente o corredor metálico, revelando painéis com luzes intermitentes e ecos distantes.',
-        'Um close ao rosto do protagonista enquanto os olhos fixam um ponto fora do ecrã, expressão tensa e concentrada.',
-        'Plano geral que revela a imensidão do ambiente, destacando a pequenez da personagem no espaço.',
-        'Detalhes de equipamento tecnológico em primeiro plano, desfocando o movimento ao fundo.',
-        'A personagem estende a mão para algo fora do enquadramento, câmara acompanha o gesto lentamente.',
-        'Corte rápido para um visor holográfico com dados em movimento, refletindo nos olhos da personagem.'
-      ];
-    } else if (keywords.hasAction) {
-      descriptions = [
-        'Câmara em movimento rápido acompanha a personagem em plano americano, fundo em blur cinético.',
-        'Corte brusco para grande plano do rosto, suor visível, respiração acelerada, tensão máxima.',
-        'Plano de conjunto capta o ambiente caótico, câmara trêmula adiciona urgência à cena.',
-        'Detalhe de mãos segurando algo com força, plano fechado e foco nítido no objeto.',
-        'Câmara baixa, contrapicado dramático, personagem ocupa o frame com presença dominante.',
-        'Plano geral revela a escala do confronto, pequenas figuras contra um cenário grandioso.'
-      ];
-    } else if (keywords.hasMystery) {
-      descriptions = [
-        'A câmara avança lentamente por um corredor escuro, luz fraca ao fundo criando profundidade de campo.',
-        'Grande plano de um objeto misterioso iluminado por um único feixe de luz, sombras pesadas à volta.',
-        'O protagonista para e olha para trás, câmara fixa capta a hesitação no momento.',
-        'Plano detalhe de uma pista ou objeto, câmara faz rack focus revelando contexto ao fundo.',
-        'Silhueta da personagem contra uma janela iluminada, identidade obscurecida intencionalmente.',
-        'Câmara recua lentamente, revelando progressivamente o espaço ao redor da personagem isolada.'
-      ];
-    } else {
-      descriptions = [
-        'A câmara abre com um plano estabelecedor que contextualiza o ambiente narrativo da cena.',
-        'Plano médio da personagem principal em ação, expressão facial comunica o estado emocional.',
-        'Close progressivo que isola o detalhe mais importante da cena, criando foco narrativo.',
-        'Câmara acompanha o movimento da personagem em travelling suave, mantendo distância dramática.',
-        'Plano de conjunto que posiciona as personagens no espaço, dinâmica visual equilibrada.',
-        'Enquadramento final que encerra visualmente a sequência, composição simétrica e estável.'
-      ];
-    }
-  } else if (genre === 'documental' || genre === 'institucional') {
-    descriptions = [
-      'Câmara de mão capta o ambiente com naturalidade, luz disponível, sem encenação visível.',
-      'Entrevistado em plano médio ligeiramente lateral, fundo desfocado, olhar para fora do eixo.',
-      'Plano detalhe de mãos em movimento, trabalho ou gesto que complementa o discurso oral.',
-      'Plano geral do espaço captado em movimento lento, câmara explora o ambiente sem cortes.',
-      'Close no rosto durante momento de emoção ou revelação, câmara mantém distância respeitosa.',
-      'Plano de conjunto que enquadra o sujeito no seu contexto natural, relação figura-fundo clara.'
-    ];
-  } else if (genre === 'publicidade') {
-    descriptions = [
-      'Produto em destaque com iluminação profissional, fundo limpo e composição cuidada.',
-      'Consumidor feliz em plano médio, luz alta e expressão genuína de satisfação.',
-      'Detalhe do produto em macro, texturas visíveis, câmara lenta valoriza a qualidade.',
-      'Lifestyle shot com o produto integrado naturalmente na vida quotidiana.',
-      'Logótipo e assinatura da marca em plano final limpo, fundo neutro, tipografia destacada.',
-      'Comparação visual que demonstra o benefício principal, composição clara e direta.'
-    ];
-  } else if (genre === 'videoclip') {
-    descriptions = [
-      'Artista em plano americano, câmara ligeiramente baixa valoriza a presença visual.',
-      'Corte rápido sincronizado com o ritmo, câmara de mão capta a energia da performance.',
-      'Plano de conjunto no palco, movimento de câmara amplo acompanha a coreografia.',
-      'Close no rosto do artista durante nota emotiva, iluminação dramática com sombras definidas.',
-      'Detalhe de mãos no instrumento, câmara lenta realça o gesto musical.',
-      'Plano final com câmara recuando, artista no centro do enquadramento, fade gradual.'
-    ];
-  } else {
-    descriptions = [
-      'A câmara abre com um plano estabelecedor que contextualiza o ambiente narrativo.',
-      'Plano médio da personagem principal, expressão facial comunica o estado emocional.',
-      'Close que isola o detalhe mais importante da cena, criando foco narrativo.',
-      'Câmara acompanha o movimento em travelling suave, mantendo distância dramática.',
-      'Plano de conjunto que posiciona os elementos no espaço, dinâmica visual equilibrada.',
-      'Enquadramento final que encerra visualmente a sequência, composição estável.'
-    ];
-  }
-  var idx = Math.min(sceneIndex, descriptions.length - 1);
-  return descriptions[idx] || descriptions[0];
+function getDescriptions(genre, keywords) {
+  if (genre === 'documental') return DESCRIPTIONS.documental;
+  if (genre === 'publicidade') return DESCRIPTIONS.publicidade;
+  if (genre === 'videoclip') return DESCRIPTIONS.videoclip;
+  if (genre === 'animacao') return DESCRIPTIONS.animacao;
+  if (genre === 'videojogo') return DESCRIPTIONS.videojogo;
+  if (genre === 'serie') return DESCRIPTIONS.serie;
+  if (genre === 'curtametragem') return DESCRIPTIONS.curtametragem;
+  if (genre === 'institucional') return DESCRIPTIONS.institucional;
+  // cinematografico e default
+  if (keywords.hasScifi) return DESCRIPTIONS.cinematografico_scifi;
+  if (keywords.hasAction) return DESCRIPTIONS.cinematografico_action;
+  if (keywords.hasMystery) return DESCRIPTIONS.cinematografico_mystery;
+  return DESCRIPTIONS.cinematografico_default;
 }
 
 function generateStoryboard() {
@@ -385,11 +465,15 @@ function generateStoryboard() {
   var keywords = extractKeywords(narrative);
   var structures = SCENE_STRUCTURES[genre] || SCENE_STRUCTURES['cinematografico'];
   var ambientes = AMBIENTES[genre] || AMBIENTES['cinematografico'];
+  var descriptions = getDescriptions(genre, keywords);
   var genreLabels = {
     cinematografico: 'CINEMATOGRÁFICO', documental: 'DOCUMENTAL', publicidade: 'PUBLICIDADE',
     videoclip: 'VIDEOCLIP', animacao: 'ANIMAÇÃO', videojogo: 'VIDEOJOGO',
     serie: 'SÉRIE TV', curtametragem: 'CURTA-METRAGEM', institucional: 'INSTITUCIONAL'
   };
+
+  // Shuffle descriptions para não seguir sempre a mesma ordem
+  var shuffled = descriptions.slice().sort(function() { return Math.random() - 0.5; });
 
   var cenas = [];
   for (var i = 0; i < numScenes; i++) {
@@ -398,7 +482,7 @@ function generateStoryboard() {
     cenas.push({
       numero: i + 1,
       titulo: pick(SCENE_TITLES[struct.role] || ['Cena ' + (i + 1)]),
-      descricao: generateDescription(keywords, struct.role, genre, i, numScenes),
+      descricao: shuffled[i % shuffled.length],
       tipo_plano: pickBias(SHOT_TYPES, struct.shotBias),
       movimento_camara: pickBias(CAMERA_MOVES, struct.moveBias),
       transicao: pickBias(TRANSITIONS, struct.transBias),
@@ -465,6 +549,3 @@ function renderStoryboard(data, genre, genreLabel, narrative) {
 </script>
 </body>
 </html>
-
-// Storyboard Generator
-// Gera um storyboard visual a partir de uma narrativa textual, utilizando técnicas de IA para criar
