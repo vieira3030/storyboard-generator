@@ -37,8 +37,13 @@
     .btn-generate { flex: 1; background: var(--accent); color: #0d0d0d; border: none; padding: 14px 32px; font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; cursor: pointer; border-radius: 2px; transition: background 0.2s, transform 0.1s; }
     .btn-generate:hover { background: var(--accent2); }
     .btn-generate:active { transform: scale(0.99); }
+    .btn-generate:disabled { opacity: 0.4; cursor: not-allowed; }
     .btn-clear { background: transparent; color: var(--muted); border: 1px solid var(--border); padding: 14px 20px; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 2px; cursor: pointer; border-radius: 2px; transition: all 0.2s; }
     .btn-clear:hover { border-color: var(--danger); color: var(--danger); }
+    .status { display: none; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 2px; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1px; margin-bottom: 30px; }
+    .status.loading { display: flex; background: rgba(232,213,163,0.08); color: var(--accent); border: 1px solid rgba(232,213,163,0.2); }
+    .status.error { display: flex; background: rgba(224,108,90,0.08); color: var(--danger); border: 1px solid rgba(224,108,90,0.2); }
+    .spinner { width: 14px; height: 14px; border: 2px solid rgba(232,213,163,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
     #output { display: none; animation: fadeUp 0.5s ease both; }
     .output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
     .output-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; color: var(--accent); }
@@ -62,9 +67,10 @@
     .tag-camera { background: rgba(232,213,163,0.08); color: var(--accent); border: 1px solid rgba(232,213,163,0.15); }
     .tag-duration { background: rgba(122,117,112,0.1); color: var(--muted); border: 1px solid var(--border); }
     .scene-ambiente { margin-top: 8px; font-size: 12px; color: var(--muted); opacity: 0.7; }
+    .powered-by { text-align: center; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 2px; margin-top: 8px; opacity: 0.5; }
     @media print {
       body { background: white; color: black; }
-      header, .input-section, .btn-export { display: none !important; }
+      header, .input-section, .status, .btn-export { display: none !important; }
       .scene-card { border: 1px solid #ccc; break-inside: avoid; page-break-inside: avoid; }
       .frame-visual { background: #f0f0f0; }
       #output { display: block !important; }
@@ -74,6 +80,7 @@
     .print-header h2 { font-size: 28px; margin-bottom: 4px; font-family: sans-serif; }
     .print-header p { font-size: 12px; color: #666; font-family: sans-serif; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes spin { to { transform: rotate(360deg); } }
     @media (max-width: 768px) { main { padding: 40px 20px; } header { padding: 16px 20px; } .input-row { grid-template-columns: 1fr; } .storyboard-grid { grid-template-columns: 1fr; } .btn-row { flex-direction: column; } }
   </style>
 </head>
@@ -85,21 +92,21 @@
 <main>
   <div class="hero">
     <h1>GERA O TEU<br><em>STORYBOARD</em></h1>
-    <p>Descreve a tua narrativa e o sistema estrutura automaticamente as cenas, enquadramentos e transições cinematográficas.</p>
+    <p>Descreve a tua narrativa e a IA estrutura automaticamente as cenas, enquadramentos e transições cinematográficas.</p>
   </div>
   <div class="input-section">
     <div class="input-row">
       <div class="field">
         <label>Género</label>
         <select id="genre">
-          <option value="cinematografico">Cinematográfico</option>
+          <option value="cinematográfico">Cinematográfico</option>
           <option value="documental">Documental</option>
           <option value="publicidade">Publicidade</option>
           <option value="videoclip">Videoclip</option>
-          <option value="animacao">Animação</option>
+          <option value="animação">Animação</option>
           <option value="videojogo">Videojogo / Cutscene</option>
-          <option value="serie">Série TV</option>
-          <option value="curtametragem">Curta-Metragem</option>
+          <option value="série TV">Série TV</option>
+          <option value="curta-metragem">Curta-Metragem</option>
           <option value="institucional">Institucional</option>
         </select>
       </div>
@@ -116,9 +123,14 @@
     <textarea id="narrative" placeholder="Ex: Uma detetive recebe uma carta misteriosa escrita por ela mesma há 20 anos, descrevendo com detalhe o crime que está a investigar hoje..." oninput="updateCounter()"></textarea>
     <div class="char-counter"><span id="charCount">0</span> / 500 CARACTERES</div>
     <div class="btn-row">
-      <button class="btn-generate" onclick="generateStoryboard()">GERAR STORYBOARD</button>
+      <button class="btn-generate" id="generateBtn" onclick="generateStoryboard()">GERAR STORYBOARD</button>
       <button class="btn-clear" onclick="clearForm()">LIMPAR</button>
     </div>
+    <div class="powered-by">POWERED BY GROQ AI · LLAMA 3.3</div>
+  </div>
+  <div class="status" id="status">
+    <div class="spinner" id="spinner"></div>
+    <span id="statusText">A gerar storyboard com IA...</span>
   </div>
   <div id="output">
     <div class="print-header">
@@ -136,416 +148,150 @@
   </div>
 </main>
 <script>
-var SHOT_TYPES = ['Plano Geral', 'Plano Médio', 'Grande Plano', 'Plano Detalhe', 'Plano Picado', 'Plano Contrapicado', 'Plano Americano', 'Plano Sequência'];
-var CAMERA_MOVES = ['Fixo', 'Pan Direita', 'Pan Esquerda', 'Tilt Up', 'Tilt Down', 'Travelling', 'Zoom In', 'Zoom Out', 'Dolly', 'Steadicam'];
-var TRANSITIONS = ['Corte', 'Fade', 'Dissolve', 'Corte Seco', 'Fade to Black', 'Wipe', 'Corte Direto'];
-var DURATIONS = ['2s', '3s', '4s', '5s', '6s', '8s', '10s', '12s'];
+  // Substitui pela tua API key do Groq (console.groq.com)
+  var GROQ_API_KEY = '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';
 
-var AMBIENTES = {
-  cinematografico: ['Luz natural difusa, tons frios', 'Contraluz dramático, silhuetas fortes', 'Interior com luz baixa e sombras profundas', 'Exterior dourado, hora mágica', 'Luz artificial dura, contraste elevado', 'Neblina suave, profundidade reduzida', 'Chuva suave, reflexos no pavimento', 'Amanhecer com cores quentes e névoa', 'Interior noturno com vela como única fonte de luz', 'Exterior com tempestade aproximando-se'],
-  documental: ['Luz natural disponível, tons neutros', 'Interior com luz ambiente, realista', 'Exterior com céu nublado, luz flat', 'Luz de janela suave e direcional', 'Ambiente urbano, luzes mistas', 'Campo aberto, luz solar direta', 'Mercado movimentado, luz natural intensa', 'Corredor hospitalar, luz fria e fria', 'Sala de reunião com luz de escritório', 'Exterior ao entardecer, última hora de luz'],
-  publicidade: ['Estúdio com luz controlada e limpa', 'Alta chave, tons brancos e luminosos', 'Produto iluminado com luz lateral', 'Exterior limpo, céu azul saturado', 'Interior moderno, luz de design', 'Luz quente e convidativa', 'Pôr do sol com tons alaranjados e dourados', 'Estúdio minimalista, fundo branco', 'Cozinha moderna com luz natural abundante', 'Exterior com bokeh suave e cores vibrantes'],
-  videoclip: ['Luz neón colorida, tons vibrantes', 'Backlights com fumo, atmosfera intensa', 'Luz estroboscópica, ritmo visual', 'Exterior noturno com luzes da cidade', 'Estúdio com color gels saturados', 'Pôr do sol dramático e colorido', 'Chuva com iluminação néon refletida', 'Interior industrial com luz pontual dramática', 'Deserto ao amanhecer com tons pastel', 'Telhado noturno com cidade iluminada ao fundo'],
-  animacao: ['Paleta de cores vivas e saturadas', 'Iluminação flat com sombras simples', 'Luz mágica com partículas brilhantes', 'Ambiente fantástico com cores irreais', 'Interior acolhedor com luz quente', 'Exterior com céu expressivo e colorido', 'Floresta encantada com luz filtrada pelas árvores', 'Castelo sombrio com raios de luz dramáticos', 'Underwater com luz difusa e tons azuis', 'Dimensão alternativa com paleta surreal'],
-  videojogo: ['Iluminação dinâmica em tempo real', 'Ambiente pós-apocalíptico, tons desaturados', 'Dungeon com tochas e sombras longas', 'Exterior sci-fi com luz neón e fog', 'Interior de nave com luz fria e azul', 'Floresta densa com raios de luz filtrados', 'Arena de combate com spotlights dramáticos', 'Cidade cyberpunk à noite com néon refletido', 'Ruínas antigas com luz solar lateral', 'Base inimiga com iluminação vermelha de alerta'],
-  serie: ['Luz de estúdio controlada, tons neutros', 'Interior doméstico com luz natural', 'Exterior urbano, luz disponível', 'Close emocional com luz suave e direcional', 'Cena noturna com luz artificial quente', 'Ambiente de escritório, luz fria e flat', 'Bar ou restaurante com luz ambiente quente', 'Hospital com luz fria e asséptica', 'Exterior suburban ao final do dia', 'Interior de carro com luz de rua refletida'],
-  curtametragem: ['Luz natural disponível, estética indie', 'Contraluz expressivo, tons poéticos', 'Interior minimalista com sombras longas', 'Exterior ao amanhecer, cores frias e puras', 'Luz de janela única, alto contraste', 'Noturno urbano com luzes de néon suaves', 'Praia ao entardecer com luz rasante', 'Interior abandonado com luz entrando pelas fissuras', 'Floresta com luz filtrada e partículas de pó', 'Telhado urbano ao pôr do sol'],
-  institucional: ['Luz de estúdio limpa e profissional', 'Exterior corporativo, luz natural controlada', 'Interior moderno com luz fria e clara', 'Entrevista com luz de três pontos clássica', 'Produto ou serviço em destaque, luz lateral', 'Espaço de trabalho com luz ambiente natural', 'Sala de conferências com luz neutra', 'Exterior de edifício corporativo, luz de dia', 'Laboratório ou espaço técnico com luz branca', 'Evento ou apresentação com luz de palco']
-};
-
-var SCENE_STRUCTURES = {
-  cinematografico: [
-    { role: 'abertura', shotBias: [0, 6, 4], moveBias: [0, 5], transBias: [0, 2], durBias: [4, 6] },
-    { role: 'apresentacao', shotBias: [1, 2], moveBias: [0, 6], transBias: [0, 3], durBias: [2, 4] },
-    { role: 'desenvolvimento', shotBias: [1, 2, 3], moveBias: [1, 2, 5], transBias: [0, 3], durBias: [2, 5] },
-    { role: 'tensao', shotBias: [2, 3, 5], moveBias: [6, 7], transBias: [3, 0], durBias: [0, 2] },
-    { role: 'climax', shotBias: [3, 5, 2], moveBias: [6, 8], transBias: [0, 3], durBias: [1, 3] },
-    { role: 'resolucao', shotBias: [0, 1, 4], moveBias: [0, 4], transBias: [1, 4], durBias: [5, 7] }
-  ],
-  documental: [
-    { role: 'contexto', shotBias: [0, 6], moveBias: [0, 1], transBias: [0, 2], durBias: [4, 6] },
-    { role: 'sujeito', shotBias: [1, 2], moveBias: [0, 3], transBias: [0, 2], durBias: [3, 5] },
-    { role: 'detalhe', shotBias: [3, 2], moveBias: [0, 9], transBias: [0, 3], durBias: [1, 3] },
-    { role: 'reacao', shotBias: [2, 1], moveBias: [0, 4], transBias: [2, 0], durBias: [2, 4] },
-    { role: 'ambiente', shotBias: [0, 7], moveBias: [1, 2], transBias: [0, 2], durBias: [4, 6] },
-    { role: 'conclusao', shotBias: [0, 1], moveBias: [0, 7], transBias: [1, 4], durBias: [5, 7] }
-  ],
-  publicidade: [
-    { role: 'gancho', shotBias: [3, 2], moveBias: [6, 0], transBias: [0, 3], durBias: [0, 2] },
-    { role: 'produto', shotBias: [3, 2], moveBias: [9, 6], transBias: [0, 2], durBias: [2, 4] },
-    { role: 'beneficio', shotBias: [1, 2], moveBias: [5, 0], transBias: [0, 3], durBias: [2, 3] },
-    { role: 'emocao', shotBias: [2, 1], moveBias: [0, 6], transBias: [2, 0], durBias: [2, 3] },
-    { role: 'cta', shotBias: [3, 0], moveBias: [7, 0], transBias: [0, 4], durBias: [1, 3] },
-    { role: 'logo', shotBias: [3, 2], moveBias: [0, 7], transBias: [4, 1], durBias: [2, 4] }
-  ],
-  videoclip: [
-    { role: 'intro', shotBias: [0, 4], moveBias: [5, 1], transBias: [0, 5], durBias: [2, 4] },
-    { role: 'performance', shotBias: [1, 2], moveBias: [0, 8], transBias: [0, 3], durBias: [1, 3] },
-    { role: 'narrativa', shotBias: [1, 2], moveBias: [5, 0], transBias: [3, 2], durBias: [2, 4] },
-    { role: 'detalhe', shotBias: [3, 2], moveBias: [6, 7], transBias: [0, 5], durBias: [0, 2] },
-    { role: 'climax', shotBias: [2, 5], moveBias: [8, 6], transBias: [0, 5], durBias: [1, 2] },
-    { role: 'final', shotBias: [0, 1], moveBias: [7, 4], transBias: [1, 4], durBias: [3, 5] }
-  ],
-  animacao: [
-    { role: 'mundo', shotBias: [0, 6], moveBias: [1, 5], transBias: [0, 2], durBias: [4, 6] },
-    { role: 'personagem', shotBias: [1, 2], moveBias: [0, 6], transBias: [0, 2], durBias: [3, 5] },
-    { role: 'acao', shotBias: [1, 3], moveBias: [5, 8], transBias: [0, 3], durBias: [1, 3] },
-    { role: 'reacao', shotBias: [2, 4], moveBias: [0, 6], transBias: [3, 0], durBias: [2, 3] },
-    { role: 'descoberta', shotBias: [3, 2], moveBias: [6, 4], transBias: [2, 0], durBias: [2, 4] },
-    { role: 'resolucao', shotBias: [0, 1], moveBias: [7, 0], transBias: [1, 2], durBias: [4, 6] }
-  ],
-  videojogo: [
-    { role: 'ambiente', shotBias: [0, 4], moveBias: [5, 1], transBias: [0, 2], durBias: [4, 6] },
-    { role: 'personagem', shotBias: [5, 1], moveBias: [4, 8], transBias: [0, 3], durBias: [2, 4] },
-    { role: 'objetivo', shotBias: [3, 1], moveBias: [6, 0], transBias: [0, 3], durBias: [2, 3] },
-    { role: 'acao', shotBias: [1, 2], moveBias: [8, 5], transBias: [0, 3], durBias: [1, 2] },
-    { role: 'confronto', shotBias: [2, 5], moveBias: [6, 8], transBias: [3, 0], durBias: [1, 3] },
-    { role: 'desfecho', shotBias: [0, 1], moveBias: [7, 4], transBias: [1, 4], durBias: [3, 5] }
-  ],
-  serie: [
-    { role: 'abertura', shotBias: [0, 1], moveBias: [0, 5], transBias: [0, 2], durBias: [3, 5] },
-    { role: 'apresentacao', shotBias: [1, 2], moveBias: [0, 6], transBias: [0, 3], durBias: [2, 4] },
-    { role: 'desenvolvimento', shotBias: [1, 2], moveBias: [5, 0], transBias: [0, 3], durBias: [2, 4] },
-    { role: 'tensao', shotBias: [2, 3], moveBias: [6, 0], transBias: [3, 0], durBias: [1, 3] },
-    { role: 'climax', shotBias: [2, 5], moveBias: [6, 8], transBias: [0, 3], durBias: [1, 3] },
-    { role: 'resolucao', shotBias: [0, 1], moveBias: [0, 7], transBias: [1, 4], durBias: [4, 6] }
-  ],
-  curtametragem: [
-    { role: 'abertura', shotBias: [0, 4], moveBias: [5, 0], transBias: [0, 2], durBias: [4, 6] },
-    { role: 'apresentacao', shotBias: [2, 1], moveBias: [0, 9], transBias: [2, 0], durBias: [3, 5] },
-    { role: 'tensao', shotBias: [3, 2], moveBias: [6, 0], transBias: [0, 3], durBias: [2, 4] },
-    { role: 'climax', shotBias: [2, 5], moveBias: [8, 6], transBias: [0, 3], durBias: [1, 2] },
-    { role: 'resolucao', shotBias: [0, 1], moveBias: [7, 0], transBias: [1, 4], durBias: [5, 7] },
-    { role: 'conclusao', shotBias: [3, 0], moveBias: [0, 4], transBias: [4, 1], durBias: [5, 7] }
-  ],
-  institucional: [
-    { role: 'contexto', shotBias: [0, 6], moveBias: [0, 1], transBias: [0, 2], durBias: [4, 6] },
-    { role: 'sujeito', shotBias: [1, 2], moveBias: [0, 9], transBias: [0, 2], durBias: [3, 5] },
-    { role: 'produto', shotBias: [3, 1], moveBias: [9, 0], transBias: [0, 2], durBias: [2, 4] },
-    { role: 'beneficio', shotBias: [1, 2], moveBias: [5, 0], transBias: [0, 3], durBias: [2, 3] },
-    { role: 'emocao', shotBias: [2, 1], moveBias: [0, 6], transBias: [2, 0], durBias: [2, 3] },
-    { role: 'cta', shotBias: [3, 0], moveBias: [7, 0], transBias: [4, 1], durBias: [2, 4] }
-  ]
-};
-
-var SCENE_TITLES = {
-  abertura: ['Abertura', 'O Início', 'Estabelecimento', 'O Mundo'],
-  apresentacao: ['Apresentação', 'O Protagonista', 'A Personagem', 'Quem É'],
-  desenvolvimento: ['Desenvolvimento', 'O Conflito', 'A Viagem', 'Mudança'],
-  tensao: ['Tensão', 'O Perigo', 'Ponto de Viragem', 'A Ameaça'],
-  climax: ['Clímax', 'O Confronto', 'Momento Decisivo', 'Ponto Máximo'],
-  resolucao: ['Resolução', 'O Desfecho', 'Epílogo', 'O Fim'],
-  contexto: ['Contexto', 'O Local', 'Enquadramento', 'O Ambiente'],
-  sujeito: ['O Sujeito', 'Protagonista', 'A Voz', 'Quem Fala'],
-  detalhe: ['Detalhe', 'Close-Up', 'O Pormenor', 'Foco'],
-  reacao: ['Reação', 'A Resposta', 'Impacto', 'O Momento'],
-  ambiente: ['Ambiente', 'O Espaço', 'Contexto Visual', 'O Lugar'],
-  conclusao: ['Conclusão', 'Reflexão Final', 'O Encerramento', 'Fim'],
-  gancho: ['O Gancho', 'Atenção', 'O Momento', 'Impacto'],
-  produto: ['O Produto', 'Destaque', 'A Solução', 'Em Foco'],
-  beneficio: ['O Benefício', 'A Promessa', 'Porquê Escolher', 'A Diferença'],
-  emocao: ['A Emoção', 'O Sentimento', 'Conexão', 'O Desejo'],
-  cta: ['Chamada à Ação', 'O Convite', 'Descobre Mais', 'Experimenta'],
-  logo: ['A Marca', 'Identidade', 'Quem Somos', 'O Logo'],
-  intro: ['Intro', 'O Ambiente', 'Abertura', 'O Palco'],
-  performance: ['Performance', 'No Palco', 'A Atuação', 'O Artista'],
-  narrativa: ['A História', 'Narrativa', 'O Momento', 'A Cena'],
-  final: ['Final', 'O Encerramento', 'Último Frame', 'Saída'],
-  mundo: ['O Mundo', 'Universo', 'O Cenário', 'Onde Tudo Começa'],
-  personagem: ['O Herói', 'A Personagem', 'Protagonista', 'O Eleito'],
-  acao: ['A Ação', 'Em Movimento', 'A Missão', 'Avanço'],
-  descoberta: ['A Descoberta', 'Revelação', 'O Segredo', 'Encontro'],
-  objetivo: ['O Objetivo', 'A Missão', 'O Alvo', 'Para Onde'],
-  confronto: ['O Confronto', 'Batalha', 'O Duelo', 'Enfrenta'],
-  desfecho: ['Desfecho', 'Vitória', 'O Fim', 'Após a Batalha']
-};
-
-// Descrições por género — 10 por cada para não repetir
-var DESCRIPTIONS = {
-  cinematografico_scifi: [
-    'A câmara percorre lentamente o corredor metálico, revelando painéis com luzes intermitentes e ecos distantes.',
-    'Um close ao rosto do protagonista enquanto os olhos fixam um ponto fora do ecrã, expressão tensa e concentrada.',
-    'Plano geral que revela a imensidão do ambiente, destacando a pequenez da personagem no espaço.',
-    'Detalhes de equipamento tecnológico em primeiro plano, desfocando o movimento ao fundo.',
-    'A personagem estende a mão para algo fora do enquadramento, câmara acompanha o gesto lentamente.',
-    'Corte rápido para um visor holográfico com dados em movimento, refletindo nos olhos da personagem.',
-    'Travelling lento acompanha a personagem por um túnel iluminado apenas por luz azul fria e pulsante.',
-    'Plano detalhe de um painel de controlo com alertas vermelhos piscando, mãos hesitam antes de agir.',
-    'Grande plano do rosto em perfil, luz lateral dura cria sombra profunda na metade escura do rosto.',
-    'Câmara recua lentamente revelando uma janela com o vazio do espaço ao fundo, silhueta em contraluz.'
-  ],
-  cinematografico_action: [
-    'Câmara em movimento rápido acompanha a personagem em plano americano, fundo em blur cinético.',
-    'Corte brusco para grande plano do rosto, suor visível, respiração acelerada, tensão máxima.',
-    'Plano de conjunto capta o ambiente caótico, câmara trêmula adiciona urgência à cena.',
-    'Detalhe de mãos segurando algo com força, plano fechado e foco nítido no objeto.',
-    'Câmara baixa, contrapicado dramático, personagem ocupa o frame com presença dominante.',
-    'Plano geral revela a escala do confronto, pequenas figuras contra um cenário grandioso.',
-    'Slow motion captura o momento de impacto, cada detalhe amplificado pela velocidade reduzida.',
-    'Câmara circular a 360 graus em torno da personagem, ambiente desfocado em movimento.',
-    'Plano sequência sem cortes acompanha a ação de ponta a ponta, câmara nunca para.',
-    'Close rápido nos olhos seguido de corte seco para o objeto de foco da personagem.'
-  ],
-  cinematografico_mystery: [
-    'A câmara avança lentamente por um corredor escuro, luz fraca ao fundo criando profundidade de campo.',
-    'Grande plano de um objeto misterioso iluminado por um único feixe de luz, sombras pesadas à volta.',
-    'O protagonista para e olha para trás, câmara fixa capta a hesitação no momento.',
-    'Plano detalhe de uma pista ou objeto, câmara faz rack focus revelando contexto ao fundo.',
-    'Silhueta da personagem contra uma janela iluminada, identidade obscurecida intencionalmente.',
-    'Câmara recua lentamente, revelando progressivamente o espaço ao redor da personagem isolada.',
-    'Reflexo na superfície brilhante revela algo que a personagem ainda não viu, câmara fixa.',
-    'Travelling lateral lento pelo espaço, câmara descobre pistas visuais ao longo do percurso.',
-    'Plano picado sobre a personagem que examina algo no chão, ângulo cria sensação de vulnerabilidade.',
-    'Foco suave no fundo onde algo se move, personagem em primeiro plano ainda não percebeu.'
-  ],
-  cinematografico_default: [
-    'A câmara abre com um plano estabelecedor que contextualiza o ambiente narrativo da cena.',
-    'Plano médio da personagem principal em ação, expressão facial comunica o estado emocional.',
-    'Close progressivo que isola o detalhe mais importante da cena, criando foco narrativo.',
-    'Câmara acompanha o movimento da personagem em travelling suave, mantendo distância dramática.',
-    'Plano de conjunto que posiciona as personagens no espaço, dinâmica visual equilibrada.',
-    'Enquadramento final que encerra visualmente a sequência, composição simétrica e estável.',
-    'Câmara fixa observa a cena sem intervir, personagem age com naturalidade no espaço.',
-    'Plano contrapicado valoriza a presença da personagem, céu ou teto como fundo.',
-    'Dissolve suave transporta entre dois momentos temporais distintos, ligação emocional mantida.',
-    'Grande plano capta micro-expressão decisiva, momento de realização ou mudança interior.'
-  ],
-  documental: [
-    'Câmara de mão capta o ambiente com naturalidade, luz disponível, sem encenação visível.',
-    'Entrevistado em plano médio ligeiramente lateral, fundo desfocado, olhar para fora do eixo.',
-    'Plano detalhe de mãos em movimento, trabalho ou gesto que complementa o discurso oral.',
-    'Plano geral do espaço captado em movimento lento, câmara explora o ambiente sem cortes.',
-    'Close no rosto durante momento de emoção ou revelação, câmara mantém distância respeitosa.',
-    'Plano de conjunto que enquadra o sujeito no seu contexto natural, relação figura-fundo clara.',
-    'Câmara segue o sujeito em movimento, plano de acompanhamento discreto e não intrusivo.',
-    'Plano inserção mostra objeto ou local referido no discurso, corte sem quebra de continuidade.',
-    'Entrevistado ouve antes de responder, câmara capta a pausa e a reflexão genuína.',
-    'Plano geral final com sujeito a distância no seu ambiente, câmara recua para encerrar.'
-  ],
-  publicidade: [
-    'Produto em destaque com iluminação profissional, fundo limpo e composição cuidada.',
-    'Consumidor feliz em plano médio, luz alta e expressão genuína de satisfação.',
-    'Detalhe do produto em macro, texturas visíveis, câmara lenta valoriza a qualidade.',
-    'Lifestyle shot com o produto integrado naturalmente na vida quotidiana.',
-    'Logótipo e assinatura da marca em plano final limpo, fundo neutro, tipografia destacada.',
-    'Comparação visual que demonstra o benefício principal, composição clara e direta.',
-    'Mão segura o produto com cuidado, câmara faz orbit suave revelando todos os ângulos.',
-    'Plano de grupo feliz em contexto de uso, produto presente mas não intrusivo.',
-    'Câmara lenta capta momento de uso do produto, expressão de prazer ou satisfação.',
-    'Texto e produto em composição gráfica limpa, identidade visual da marca no centro.'
-  ],
-  videoclip: [
-    'Artista em plano americano, câmara ligeiramente baixa valoriza a presença visual.',
-    'Corte rápido sincronizado com o ritmo, câmara de mão capta a energia da performance.',
-    'Plano de conjunto no palco, movimento de câmara amplo acompanha a coreografia.',
-    'Close no rosto do artista durante nota emotiva, iluminação dramática com sombras definidas.',
-    'Detalhe de mãos no instrumento, câmara lenta realça o gesto musical.',
-    'Plano final com câmara recuando, artista no centro do enquadramento, fade gradual.',
-    'Câmara circular em torno do artista em performance, luzes criam padrões dinâmicos.',
-    'Corte sincronizado com batida forte, novo ângulo a cada impacto musical.',
-    'Plano picado sobre a multidão ou coreografia, vista aérea revela padrão visual.',
-    'Artista olha diretamente para a câmara num momento íntimo, quebra da quarta parede.'
-  ],
-  animacao: [
-    'A câmara abre o mundo animado com um plano panorâmico cheio de cor e detalhe.',
-    'A personagem é introduzida num momento característico que define a sua personalidade.',
-    'Sequência de ação com câmara dinâmica, enquadramentos exagerados para impacto visual.',
-    'Expressão facial amplificada revela estado emocional de forma clara e expressiva.',
-    'Descoberta de algo novo, câmara acompanha o olhar da personagem com curiosidade.',
-    'Resolução com plano amplo que mostra a transformação do mundo ou da personagem.',
-    'Travelling rápido através do cenário, detalhes do mundo surgem progressivamente.',
-    'Close extremo em detalhe expressivo, olho, mão ou objeto com significado simbólico.',
-    'Personagens em interação, câmara alterna entre rostos capturando a dinâmica emocional.',
-    'Plano final poético com câmara afastando-se, personagem pequena num mundo vasto.'
-  ],
-  videojogo: [
-    'Câmara estabelece o ambiente de jogo com plano panorâmico e atmosfera épica.',
-    'Personagem principal é apresentada em pose heroica, ângulo contrapicado impõe presença.',
-    'Mapa ou objetivo é revelado com câmara overhead, estratégia visual clara.',
-    'Sequência de combate com câmara rápida e cortes agressivos sincronizados com ações.',
-    'Momento de confronto com antagonista, câmara baixa aumenta tensão e escala.',
-    'Desfecho épico com câmara recuando para revelar escala total do acontecimento.',
-    'Personagem examina o ambiente, câmara segue o olhar descobrindo pistas ou segredos.',
-    'Cutscene cinemática com iluminação dramática e enquadramento de filme de ação.',
-    'Plano detalhe de equipamento, arma ou objeto crucial para a narrativa do jogo.',
-    'Câmara fixa capta reação da personagem a revelação importante, micro-expressão visível.'
-  ],
-  serie: [
-    'Cena de abertura estabelece o tom e o ambiente da série com plano amplo e musical.',
-    'Personagem principal em ambiente doméstico ou de trabalho, rotina e carácter revelados.',
-    'Diálogo em plano e contraplano, câmara alterna entre personagens com ritmo natural.',
-    'Momento de tensão ou conflito, câmara aproxima-se progressivamente dos rostos.',
-    'Clímax do episódio com revelação ou confronto, câmara fixa capta o impacto emocional.',
-    'Cena final do episódio deixa questão em aberto, plano afasta-se para criar suspense.',
-    'Flashback ou memória com tratamento visual distinto, granulado ou saturação diferente.',
-    'Cena de grupo em espaço comum, câmara regista dinâmica entre personagens.',
-    'Momento íntimo e silencioso, câmara respeitosa mantém distância emocional adequada.',
-    'Plano final de episódio, personagem sozinha a processar acontecimentos, câmara estática.'
-  ],
-  curtametragem: [
-    'Abertura poética sem diálogo, câmara observa o ambiente com atenção ao detalhe.',
-    'Personagem apresentada através de ação, quem é revelado pelo que faz, não pelo que diz.',
-    'Tensão construída com silêncio e planos fixos, o não-dito pesa mais que as palavras.',
-    'Momento decisivo captado em plano longo sem corte, câmara testemunha sem interferir.',
-    'Resolução ambígua, câmara afasta-se sem revelar completamente o desenlace.',
-    'Último plano com composição cuidada e simbolismo visual que encerra a narrativa.',
-    'Câmara subjetiva coloca o espectador na perspetiva da personagem num momento chave.',
-    'Detalhe significativo que une o início ao fim, motivo visual recorrente com novo sentido.',
-    'Plano sequência sem cortes que acompanha uma ação completa de início ao fim.',
-    'Close final no rosto da personagem, expressão ambígua convida à interpretação pessoal.'
-  ],
-  institucional: [
-    'Plano de abertura apresenta a organização com imagem corporativa forte e positiva.',
-    'Porta-voz ou representante em entrevista, postura confiante e luz profissional.',
-    'Produto ou serviço em contexto de uso real, benefício demonstrado naturalmente.',
-    'Equipa em ação num ambiente de trabalho dinâmico, colaboração e competência visíveis.',
-    'Depoimento de cliente ou parceiro, plano médio com fundo desfocado e luz quente.',
-    'Plano final com logótipo e mensagem chave, composição limpa e profissional.',
-    'Instalações ou infraestrutura em travelling suave, escala e capacidade comunicadas.',
-    'Processo de trabalho ou produção em time-lapse, eficiência e rigor demonstrados.',
-    'Direção ou liderança em contexto natural de trabalho, autoridade comunicada sem arrogância.',
-    'Chamada à ação final com contacto ou URL, tipografia clara sobre fundo institucional.'
-  ]
-};
-
-function updateCounter() {
-  var val = document.getElementById('narrative').value;
-  document.getElementById('charCount').textContent = val.length;
-}
-
-function clearForm() {
-  document.getElementById('narrative').value = '';
-  document.getElementById('charCount').textContent = '0';
-  document.getElementById('genre').selectedIndex = 0;
-  document.getElementById('numScenes').selectedIndex = 1;
-  document.getElementById('output').style.display = 'none';
-}
-
-function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
-
-function pickBias(arr, biasIndices) {
-  if (Math.random() < 0.7 && biasIndices && biasIndices.length > 0) {
-    return arr[biasIndices[Math.floor(Math.random() * biasIndices.length)]];
-  }
-  return pick(arr);
-}
-
-function extractKeywords(text) {
-  var lower = text.toLowerCase();
-  return {
-    hasAction: /luta|guerra|combate|correr|fugir|perseguição|explosão|ataque|batalha|corrida/.test(lower),
-    hasMystery: /mistério|segredo|descobrir|esconder|sombra|oculto|revelação|investigar|detetive|carta/.test(lower),
-    hasScifi: /espaço|robô|futuro|tecnologia|nave|planeta|astronauta|digital|virtual|holograma/. test(lower)
-  };
-}
-
-function getDescriptions(genre, keywords) {
-  if (genre === 'documental') return DESCRIPTIONS.documental;
-  if (genre === 'publicidade') return DESCRIPTIONS.publicidade;
-  if (genre === 'videoclip') return DESCRIPTIONS.videoclip;
-  if (genre === 'animacao') return DESCRIPTIONS.animacao;
-  if (genre === 'videojogo') return DESCRIPTIONS.videojogo;
-  if (genre === 'serie') return DESCRIPTIONS.serie;
-  if (genre === 'curtametragem') return DESCRIPTIONS.curtametragem;
-  if (genre === 'institucional') return DESCRIPTIONS.institucional;
-  // cinematografico e default
-  if (keywords.hasScifi) return DESCRIPTIONS.cinematografico_scifi;
-  if (keywords.hasAction) return DESCRIPTIONS.cinematografico_action;
-  if (keywords.hasMystery) return DESCRIPTIONS.cinematografico_mystery;
-  return DESCRIPTIONS.cinematografico_default;
-}
-
-function generateStoryboard() {
-  var narrative = document.getElementById('narrative').value.trim();
-  var genre = document.getElementById('genre').value;
-  var numScenes = parseInt(document.getElementById('numScenes').value);
-
-  if (!narrative) { alert('Escreve uma narrativa primeiro.'); return; }
-
-  var keywords = extractKeywords(narrative);
-  var structures = SCENE_STRUCTURES[genre] || SCENE_STRUCTURES['cinematografico'];
-  var ambientes = AMBIENTES[genre] || AMBIENTES['cinematografico'];
-  var descriptions = getDescriptions(genre, keywords);
-  var genreLabels = {
-    cinematografico: 'CINEMATOGRÁFICO', documental: 'DOCUMENTAL', publicidade: 'PUBLICIDADE',
-    videoclip: 'VIDEOCLIP', animacao: 'ANIMAÇÃO', videojogo: 'VIDEOJOGO',
-    serie: 'SÉRIE TV', curtametragem: 'CURTA-METRAGEM', institucional: 'INSTITUCIONAL'
+  var shotSVGs = {
+    'Plano Geral': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="15" width="280" height="150" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><line x1="20" y1="130" x2="300" y2="130" stroke="#e8d5a3" stroke-width="1" opacity="0.25"/><ellipse cx="160" cy="100" rx="15" ry="18" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.35"/><path d="M100 130 Q120 90 145 85 Q175 90 220 130" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.3"/><path d="M20 70 Q80 50 160 55 Q240 50 300 70" fill="none" stroke="#e8d5a3" stroke-width="0.8" opacity="0.2"/></svg>',
+    'Plano Médio': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="60" y="20" width="200" height="140" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><ellipse cx="160" cy="70" rx="28" ry="32" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><path d="M110 140 Q130 100 160 95 Q190 100 210 140" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.35"/></svg>',
+    'Grande Plano': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="80" y="30" width="160" height="120" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><ellipse cx="160" cy="75" rx="40" ry="45" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><circle cx="160" cy="62" r="20" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.35"/></svg>',
+    'Plano Detalhe': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="100" y="50" width="120" height="80" rx="2" fill="none" stroke="#e8d5a3" stroke-width="2" opacity="0.4"/><circle cx="160" cy="90" r="28" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><line x1="135" y1="90" x2="185" y2="90" stroke="#e8d5a3" stroke-width="1" opacity="0.3"/><line x1="160" y1="65" x2="160" y2="115" stroke="#e8d5a3" stroke-width="1" opacity="0.3"/></svg>',
+    'Plano Picado': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="40" y="25" width="240" height="130" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><ellipse cx="160" cy="120" rx="55" ry="22" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.35"/><path d="M130 120 L160 55 L190 120" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/></svg>',
+    'Plano Contrapicado': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="40" y="25" width="240" height="130" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><path d="M130 40 L160 135 L190 40" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><ellipse cx="160" cy="38" rx="55" ry="20" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.3"/></svg>',
+    'Plano Americano': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="50" y="20" width="220" height="140" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><ellipse cx="160" cy="60" rx="25" ry="28" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><path d="M115 140 Q135 95 160 88 Q185 95 205 140" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.35"/><line x1="115" y1="115" x2="205" y2="115" stroke="#e8d5a3" stroke-width="0.8" opacity="0.2" stroke-dasharray="4,4"/></svg>',
+    'Plano Sequência': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="15" width="280" height="150" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><path d="M40 140 Q80 80 120 100 Q160 120 200 70 Q240 30 280 90" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><circle cx="40" cy="140" r="4" fill="#e8d5a3" opacity="0.3"/><circle cx="280" cy="90" r="4" fill="#e8d5a3" opacity="0.3"/></svg>'
   };
 
-  // Shuffle descriptions para não seguir sempre a mesma ordem
-  var shuffled = descriptions.slice().sort(function() { return Math.random() - 0.5; });
-
-  var cenas = [];
-  for (var i = 0; i < numScenes; i++) {
-    var structIdx = Math.floor((i / numScenes) * structures.length);
-    var struct = structures[structIdx] || structures[structures.length - 1];
-    cenas.push({
-      numero: i + 1,
-      titulo: pick(SCENE_TITLES[struct.role] || ['Cena ' + (i + 1)]),
-      descricao: shuffled[i % shuffled.length],
-      tipo_plano: pickBias(SHOT_TYPES, struct.shotBias),
-      movimento_camara: pickBias(CAMERA_MOVES, struct.moveBias),
-      transicao: pickBias(TRANSITIONS, struct.transBias),
-      duracao: pickBias(DURATIONS, struct.durBias),
-      ambiente: ambientes[i % ambientes.length]
-    });
+  function getSVGForScene(shotType) {
+    return shotSVGs[shotType] || shotSVGs['Plano Médio'];
   }
 
-  renderStoryboard({ cenas: cenas }, genre, genreLabels[genre], narrative);
-}
+  function updateCounter() {
+    document.getElementById('charCount').textContent = document.getElementById('narrative').value.length;
+  }
 
-var shotSVGs = {
-  'Plano Geral': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="15" width="280" height="150" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><line x1="20" y1="130" x2="300" y2="130" stroke="#e8d5a3" stroke-width="1" opacity="0.25"/><ellipse cx="160" cy="100" rx="15" ry="18" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.35"/><path d="M100 130 Q120 90 145 85 Q175 90 220 130" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.3"/><path d="M20 70 Q80 50 160 55 Q240 50 300 70" fill="none" stroke="#e8d5a3" stroke-width="0.8" opacity="0.2"/></svg>',
-  'Plano Médio': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="60" y="20" width="200" height="140" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><ellipse cx="160" cy="70" rx="28" ry="32" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><path d="M110 140 Q130 100 160 95 Q190 100 210 140" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.35"/></svg>',
-  'Grande Plano': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="80" y="30" width="160" height="120" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><ellipse cx="160" cy="75" rx="40" ry="45" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><circle cx="160" cy="62" r="20" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.35"/></svg>',
-  'Plano Detalhe': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="100" y="50" width="120" height="80" rx="2" fill="none" stroke="#e8d5a3" stroke-width="2" opacity="0.4"/><circle cx="160" cy="90" r="28" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><line x1="135" y1="90" x2="185" y2="90" stroke="#e8d5a3" stroke-width="1" opacity="0.3"/><line x1="160" y1="65" x2="160" y2="115" stroke="#e8d5a3" stroke-width="1" opacity="0.3"/></svg>',
-  'Plano Picado': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="40" y="25" width="240" height="130" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><ellipse cx="160" cy="120" rx="55" ry="22" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.35"/><path d="M130 120 L160 55 L190 120" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/></svg>',
-  'Plano Contrapicado': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="40" y="25" width="240" height="130" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><path d="M130 40 L160 135 L190 40" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><ellipse cx="160" cy="38" rx="55" ry="20" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.3"/></svg>',
-  'Plano Americano': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="50" y="20" width="220" height="140" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><ellipse cx="160" cy="60" rx="25" ry="28" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><path d="M115 140 Q135 95 160 88 Q185 95 205 140" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.35"/><line x1="115" y1="115" x2="205" y2="115" stroke="#e8d5a3" stroke-width="0.8" opacity="0.2" stroke-dasharray="4,4"/></svg>',
-  'Plano Sequência': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="15" width="280" height="150" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><path d="M40 140 Q80 80 120 100 Q160 120 200 70 Q240 30 280 90" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><circle cx="40" cy="140" r="4" fill="#e8d5a3" opacity="0.3"/><circle cx="280" cy="90" r="4" fill="#e8d5a3" opacity="0.3"/></svg>'
-};
+  function clearForm() {
+    document.getElementById('narrative').value = '';
+    document.getElementById('charCount').textContent = '0';
+    document.getElementById('genre').selectedIndex = 0;
+    document.getElementById('numScenes').selectedIndex = 1;
+    document.getElementById('output').style.display = 'none';
+    hideStatus();
+  }
 
-function getSVGForScene(shotType) {
-  return shotSVGs[shotType] || shotSVGs['Plano Médio'];
-}
+  async function generateStoryboard() {
+    var narrative = document.getElementById('narrative').value.trim();
+    var genre = document.getElementById('genre').value;
+    var numScenes = document.getElementById('numScenes').value;
 
-function renderStoryboard(data, genre, genreLabel, narrative) {
-  var grid = document.getElementById('storyboardGrid');
-  var output = document.getElementById('output');
-  var meta = document.getElementById('outputMeta');
-  var dateStr = new Date().toLocaleDateString('pt-PT');
+    if (!narrative) { showStatus('error', 'Escreve uma narrativa primeiro.'); return; }
 
-  grid.innerHTML = '';
-  meta.textContent = data.cenas.length + ' CENAS · ' + genreLabel + ' · ' + dateStr;
-  document.getElementById('printTitle').textContent = narrative.substring(0, 60) + (narrative.length > 60 ? '...' : '');
-  document.getElementById('printMeta').textContent = data.cenas.length + ' cenas · ' + genreLabel + ' · ' + dateStr;
+    var btn = document.getElementById('generateBtn');
+    btn.disabled = true;
+    document.getElementById('output').style.display = 'none';
+    showStatus('loading', 'A gerar storyboard com Groq AI...');
 
-  data.cenas.forEach(function(cena, i) {
-    var card = document.createElement('div');
-    card.className = 'scene-card';
-    card.style.animationDelay = (i * 0.07) + 's';
-    card.innerHTML =
-      '<div class="frame-visual">' +
-        '<div class="frame-number">' + String(cena.numero).padStart(2,'0') + '</div>' +
-        '<div class="frame-drawing">' + getSVGForScene(cena.tipo_plano) + '</div>' +
-        '<div class="frame-shot-type">' + cena.tipo_plano + '</div>' +
-      '</div>' +
-      '<div class="scene-info">' +
-        '<div class="scene-title">' + cena.titulo + '</div>' +
-        '<div class="scene-description">' + cena.descricao + '</div>' +
-        '<div class="scene-meta">' +
-          '<span class="meta-tag tag-transition">' + cena.transicao + '</span>' +
-          '<span class="meta-tag tag-camera">' + cena.movimento_camara + '</span>' +
-          '<span class="meta-tag tag-duration">' + cena.duracao + '</span>' +
+    var prompt = 'És um especialista em storyboards cinematográficos. Cria um storyboard com exatamente ' + numScenes + ' cenas para o género "' + genre + '" baseado nesta narrativa: "' + narrative + '". Responde APENAS com JSON válido, sem markdown, sem backticks, sem texto extra. Usa este formato exato: {"titulo":"Título do Storyboard","cenas":[{"numero":1,"titulo":"Título da cena","descricao":"Descrição visual detalhada e específica para esta narrativa em 2 frases","tipo_plano":"Plano Geral","movimento_camara":"Fixo","transicao":"Corte","duracao":"5s","ambiente":"Descrição de luz e ambiente específica para esta cena"}]}. Tipos de plano permitidos: Plano Geral, Plano Médio, Grande Plano, Plano Detalhe, Plano Picado, Plano Contrapicado, Plano Americano. As descrições devem ser únicas e específicas para a narrativa fornecida. Cria exatamente ' + numScenes + ' cenas.';
+
+    try {
+      var response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + GROQ_API_KEY
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          messages: [{ role: 'user', content: prompt }],
+          temperature: 0.8,
+          max_tokens: 3000
+        })
+      });
+
+      if (!response.ok) {
+        var errData = await response.json();
+        throw new Error(errData.error ? errData.error.message : 'Erro na API Groq');
+      }
+
+      var data = await response.json();
+      var rawText = data.choices[0].message.content;
+      var jsonText = rawText
+  .replace(/```json\n?/g, '').replace(/```\n?/g, '')
+  .replace(/[\u201C\u201D]/g, '"')
+  .replace(/[\u2018\u2019]/g, "'")
+  .trim();
+      var jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('Resposta inválida — tenta novamente');
+
+      var parsed = JSON.parse(jsonMatch[0]);
+      if (!parsed.cenas || !Array.isArray(parsed.cenas)) throw new Error('Formato inesperado — tenta novamente');
+
+      hideStatus();
+      renderStoryboard(parsed, genre, narrative);
+
+    } catch (err) {
+      showStatus('error', 'Erro: ' + err.message);
+    } finally {
+      btn.disabled = false;
+    }
+  }
+
+  function renderStoryboard(data, genre, narrative) {
+    var grid = document.getElementById('storyboardGrid');
+    var output = document.getElementById('output');
+    var meta = document.getElementById('outputMeta');
+    var dateStr = new Date().toLocaleDateString('pt-PT');
+
+    grid.innerHTML = '';
+    meta.textContent = data.cenas.length + ' CENAS · ' + genre.toUpperCase() + ' · ' + dateStr;
+    document.getElementById('printTitle').textContent = narrative.substring(0, 60) + (narrative.length > 60 ? '...' : '');
+    document.getElementById('printMeta').textContent = data.cenas.length + ' cenas · ' + genre.toUpperCase() + ' · ' + dateStr;
+
+    data.cenas.forEach(function(cena, i) {
+      var card = document.createElement('div');
+      card.className = 'scene-card';
+      card.style.animationDelay = (i * 0.07) + 's';
+      card.innerHTML =
+        '<div class="frame-visual">' +
+          '<div class="frame-number">' + String(cena.numero).padStart(2,'0') + '</div>' +
+          '<div class="frame-drawing">' + getSVGForScene(cena.tipo_plano) + '</div>' +
+          '<div class="frame-shot-type">' + (cena.tipo_plano || 'Plano') + '</div>' +
         '</div>' +
-        '<div class="scene-ambiente">💡 ' + cena.ambiente + '</div>' +
-      '</div>';
-    grid.appendChild(card);
-  });
+        '<div class="scene-info">' +
+          '<div class="scene-title">' + cena.titulo + '</div>' +
+          '<div class="scene-description">' + cena.descricao + '</div>' +
+          '<div class="scene-meta">' +
+            (cena.transicao ? '<span class="meta-tag tag-transition">' + cena.transicao + '</span>' : '') +
+            (cena.movimento_camara ? '<span class="meta-tag tag-camera">' + cena.movimento_camara + '</span>' : '') +
+            (cena.duracao ? '<span class="meta-tag tag-duration">' + cena.duracao + '</span>' : '') +
+          '</div>' +
+          (cena.ambiente ? '<div class="scene-ambiente">💡 ' + cena.ambiente + '</div>' : '') +
+        '</div>';
+      grid.appendChild(card);
+    });
 
-  output.style.display = 'block';
-  output.scrollIntoView({ behavior: 'smooth' });
-}
+    output.style.display = 'block';
+    output.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function showStatus(type, msg) {
+    var el = document.getElementById('status');
+    el.className = 'status ' + type;
+    document.getElementById('statusText').textContent = msg;
+    document.getElementById('spinner').style.display = type === 'loading' ? 'block' : 'none';
+  }
+
+  function hideStatus() {
+    var el = document.getElementById('status');
+    el.className = 'status';
+    el.style.display = 'none';
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('narrative').addEventListener('keydown', function(e) {
+      if (e.ctrlKey && e.key === 'Enter') generateStoryboard();
+    });
+  });
 </script>
 </body>
 </html>
