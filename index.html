@@ -301,21 +301,25 @@
   }
 
   async function regenScene(index) {
-    var btn = document.querySelector('[data-regen="' + index + '"]');
-    if (btn) btn.disabled = true;
+  var btn = document.querySelector('[data-regen="' + index + '"]');
+  if (btn) btn.disabled = true;
 
-    var prompt = 'És um especialista em storyboards cinematográficos. Gera UMA cena diferente (cena ' + (index + 1) + ') para um storyboard do género "' + currentGenre + '" baseado nesta narrativa: "' + currentNarrative + '". A cena deve ser diferente da versão anterior. Responde APENAS com JSON: {"numero":' + (index + 1) + ',"titulo":"Título da cena","descricao":"Descrição visual em 2 frases específica para esta narrativa","tipo_plano":"Plano Médio","movimento_camara":"Fixo","transicao":"Corte","duracao":"5s","ambiente":"Descrição de luz"}. Tipos de plano permitidos: Plano Geral, Plano Médio, Grande Plano, Plano Detalhe, Plano Picado, Plano Contrapicado, Plano Americano, Plano Sequência.';
+  var cenaAtual = currentScenes[index];
+  var descAtual = cenaAtual ? cenaAtual.descricao : '';
+  var tituloAtual = cenaAtual ? cenaAtual.titulo : '';
 
-    try {
-      var parsed = await callGroq(prompt);
-      currentScenes[index] = parsed;
-      updateSceneCard(index, parsed);
-    } catch (err) {
-      console.error('Erro ao regenerar cena:', err);
-    } finally {
-      if (btn) btn.disabled = false;
-    }
+  var prompt = 'És um especialista em storyboards cinematográficos. Gera UMA versão alternativa para esta cena de um storyboard do género "' + currentGenre + '" baseado na narrativa: "' + currentNarrative + '". A cena atual chama-se "' + tituloAtual + '" e tem esta descrição: "' + descAtual + '". Mantém o mesmo momento narrativo mas com ângulo, enquadramento ou abordagem visual diferente. Responde APENAS com JSON: {"numero":' + (index + 1) + ',"titulo":"Título ligeiramente diferente","descricao":"Descrição visual alternativa em 2 frases","tipo_plano":"Plano Médio","movimento_camara":"Fixo","transicao":"Corte","duracao":"5s","ambiente":"Descrição de luz"}. Tipos de plano permitidos: Plano Geral, Plano Médio, Grande Plano, Plano Detalhe, Plano Picado, Plano Contrapicado, Plano Americano, Plano Sequência.';
+
+  try {
+    var parsed = await callGroq(prompt);
+    currentScenes[index] = parsed;
+    updateSceneCard(index, parsed);
+  } catch (err) {
+    console.error('Erro ao regenerar cena:', err);
+  } finally {
+    if (btn) btn.disabled = false;
   }
+}
 
   function updateSceneCard(index, cena) {
     var card = document.querySelector('[data-scene="' + index + '"]');
