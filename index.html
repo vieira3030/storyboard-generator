@@ -40,50 +40,77 @@
     .btn-generate:disabled { opacity: 0.4; cursor: not-allowed; }
     .btn-clear { background: transparent; color: var(--muted); border: 1px solid var(--border); padding: 14px 20px; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 2px; cursor: pointer; border-radius: 2px; transition: all 0.2s; }
     .btn-clear:hover { border-color: var(--danger); color: var(--danger); }
-    .status { display: none; align-items: center; gap: 10px; padding: 12px 16px; border-radius: 2px; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1px; margin-bottom: 30px; }
-    .status.loading { display: flex; background: rgba(232,213,163,0.08); color: var(--accent); border: 1px solid rgba(232,213,163,0.2); }
+    .powered-by { text-align: center; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 2px; margin-top: 8px; opacity: 0.5; }
+
+    /* STATUS / LOADING */
+    .status { display: none; align-items: center; gap: 12px; padding: 16px 20px; border-radius: 4px; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1px; margin-bottom: 30px; }
+    .status.loading { display: flex; background: rgba(232,213,163,0.06); color: var(--accent); border: 1px solid rgba(232,213,163,0.15); }
     .status.error { display: flex; background: rgba(224,108,90,0.08); color: var(--danger); border: 1px solid rgba(224,108,90,0.2); }
-    .spinner { width: 14px; height: 14px; border: 2px solid rgba(232,213,163,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; flex-shrink: 0; }
+    .loading-animation { display: flex; gap: 4px; align-items: center; }
+    .loading-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: dotPulse 1.2s ease-in-out infinite; }
+    .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+    .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+    .timer { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-left: auto; }
+    @keyframes dotPulse { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+
+    /* OUTPUT */
     #output { display: none; animation: fadeUp 0.5s ease both; }
-    .output-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
+    .output-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
     .output-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; color: var(--accent); }
     .output-meta { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 1px; margin-top: 4px; }
+    .output-time { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--green); letter-spacing: 1px; margin-top: 4px; }
     .btn-export { background: transparent; color: var(--accent); border: 1px solid var(--accent); padding: 8px 20px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; cursor: pointer; border-radius: 2px; transition: all 0.2s; }
     .btn-export:hover { background: var(--accent); color: #0d0d0d; }
+
+    /* GRID */
     .storyboard-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 24px; }
     .scene-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; overflow: hidden; animation: fadeUp 0.4s ease both; transition: border-color 0.2s, transform 0.2s; }
     .scene-card:hover { border-color: var(--accent2); transform: translateY(-2px); }
+
+    /* FRAME */
     .frame-visual { aspect-ratio: 16/9; background: var(--frame-bg); position: relative; overflow: hidden; border-bottom: 1px solid var(--border); }
-    .frame-number { position: absolute; top: 10px; left: 12px; font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: rgba(232,213,163,0.3); letter-spacing: 1px; z-index: 2; }
-    .frame-shot-type { position: absolute; bottom: 10px; right: 12px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--accent); background: rgba(13,13,13,0.7); padding: 3px 8px; border-radius: 2px; text-transform: uppercase; z-index: 2; }
+    .frame-number { position: absolute; top: 10px; left: 12px; font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: rgba(232,213,163,0.5); letter-spacing: 1px; z-index: 2; text-shadow: 0 0 20px rgba(232,213,163,0.3); }
+    .frame-shot-type { position: absolute; bottom: 10px; right: 12px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--accent); background: rgba(13,13,13,0.8); padding: 3px 8px; border-radius: 2px; text-transform: uppercase; z-index: 2; border: 1px solid rgba(232,213,163,0.1); }
     .frame-drawing { position: absolute; inset: 0; }
     .frame-drawing svg { width: 100%; height: 100%; }
+
+    /* SCENE INFO */
     .scene-info { padding: 16px 18px; }
-    .scene-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; color: var(--text); margin-bottom: 8px; }
-    .scene-description { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
+    .scene-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
+    .scene-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; color: var(--text); flex: 1; }
+    .btn-regen { background: transparent; border: 1px solid var(--border); color: var(--muted); padding: 4px 8px; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; cursor: pointer; border-radius: 2px; transition: all 0.2s; white-space: nowrap; flex-shrink: 0; }
+    .btn-regen:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-regen:disabled { opacity: 0.3; cursor: not-allowed; }
+    .scene-description { font-size: 13px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; cursor: pointer; border-radius: 2px; padding: 4px; transition: background 0.2s; }
+    .scene-description:hover { background: rgba(255,255,255,0.03); }
+    .scene-description.editing { background: var(--surface2); border: 1px solid var(--accent); padding: 8px; outline: none; width: 100%; font-size: 13px; color: var(--text); line-height: 1.6; font-family: 'DM Sans', sans-serif; resize: none; border-radius: 2px; }
     .scene-meta { display: flex; gap: 8px; flex-wrap: wrap; }
     .meta-tag { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; padding: 3px 8px; border-radius: 2px; text-transform: uppercase; }
     .tag-transition { background: rgba(126,200,160,0.1); color: var(--green); border: 1px solid rgba(126,200,160,0.2); }
     .tag-camera { background: rgba(232,213,163,0.08); color: var(--accent); border: 1px solid rgba(232,213,163,0.15); }
     .tag-duration { background: rgba(122,117,112,0.1); color: var(--muted); border: 1px solid var(--border); }
     .scene-ambiente { margin-top: 8px; font-size: 12px; color: var(--muted); opacity: 0.7; }
-    .powered-by { text-align: center; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); letter-spacing: 2px; margin-top: 8px; opacity: 0.5; }
+    .edit-hint { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--muted); opacity: 0.5; margin-top: 6px; letter-spacing: 1px; }
+
+    /* PRINT */
     @media print {
       body { background: white; color: black; }
-      header, .input-section, .status, .btn-export { display: none !important; }
+      header, .input-section, .status, .btn-export, .btn-regen, .edit-hint { display: none !important; }
       .scene-card { border: 1px solid #ccc; break-inside: avoid; page-break-inside: avoid; }
-      .frame-visual { background: #1a1a1a; }
-      .frame-drawing svg { opacity: 1; }
+      .frame-visual { background: #1a1a1a !important; }
+      .frame-drawing svg { opacity: 1 !important; }
       .frame-shot-type { color: #c4a882 !important; background: rgba(0,0,0,0.5) !important; }
       .frame-number { color: rgba(232,213,163,0.6) !important; }
       #output { display: block !important; }
       .print-header { display: block !important; margin-bottom: 24px; }
+      .scene-description { color: #333 !important; }
+      .scene-title { color: #000 !important; }
     }
     .print-header { display: none; border-bottom: 2px solid #000; padding-bottom: 12px; margin-bottom: 24px; }
     .print-header h2 { font-size: 28px; margin-bottom: 4px; font-family: sans-serif; }
     .print-header p { font-size: 12px; color: #666; font-family: sans-serif; }
+
     @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes spin { to { transform: rotate(360deg); } }
     @media (max-width: 768px) { main { padding: 40px 20px; } header { padding: 16px 20px; } .input-row { grid-template-columns: 1fr; } .storyboard-grid { grid-template-columns: 1fr; } .btn-row { flex-direction: column; } }
   </style>
 </head>
@@ -131,10 +158,17 @@
     </div>
     <div class="powered-by">POWERED BY GROQ AI · LLAMA 3.3</div>
   </div>
+
   <div class="status" id="status">
-    <div class="spinner" id="spinner"></div>
+    <div class="loading-animation">
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+      <div class="loading-dot"></div>
+    </div>
     <span id="statusText">A gerar storyboard com IA...</span>
+    <span class="timer" id="timerDisplay"></span>
   </div>
+
   <div id="output">
     <div class="print-header">
       <h2 id="printTitle">STORYBOARD</h2>
@@ -144,25 +178,32 @@
       <div>
         <div class="output-title">STORYBOARD</div>
         <div class="output-meta" id="outputMeta"></div>
+        <div class="output-time" id="outputTime"></div>
       </div>
       <button class="btn-export" onclick="window.print()">EXPORTAR / IMPRIMIR</button>
     </div>
     <div class="storyboard-grid" id="storyboardGrid"></div>
   </div>
 </main>
+
 <script>
-  // Substitui pela tua API key do Groq (console.groq.com)
-  var GROQ_API_KEY = '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';
+  var GROQ_API_KEY = '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';
+
+  var currentNarrative = '';
+  var currentGenre = '';
+  var currentScenes = [];
+  var timerInterval = null;
+  var startTime = null;
 
   var shotSVGs = {
-    'Plano Geral': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="15" width="280" height="150" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><line x1="20" y1="130" x2="300" y2="130" stroke="#e8d5a3" stroke-width="1" opacity="0.25"/><ellipse cx="160" cy="100" rx="15" ry="18" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.35"/><path d="M100 130 Q120 90 145 85 Q175 90 220 130" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.3"/><path d="M20 70 Q80 50 160 55 Q240 50 300 70" fill="none" stroke="#e8d5a3" stroke-width="0.8" opacity="0.2"/></svg>',
-    'Plano Médio': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="60" y="20" width="200" height="140" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><ellipse cx="160" cy="70" rx="28" ry="32" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><path d="M110 140 Q130 100 160 95 Q190 100 210 140" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.35"/></svg>',
-    'Grande Plano': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="80" y="30" width="160" height="120" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><ellipse cx="160" cy="75" rx="40" ry="45" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><circle cx="160" cy="62" r="20" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.35"/></svg>',
-    'Plano Detalhe': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="100" y="50" width="120" height="80" rx="2" fill="none" stroke="#e8d5a3" stroke-width="2" opacity="0.4"/><circle cx="160" cy="90" r="28" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><line x1="135" y1="90" x2="185" y2="90" stroke="#e8d5a3" stroke-width="1" opacity="0.3"/><line x1="160" y1="65" x2="160" y2="115" stroke="#e8d5a3" stroke-width="1" opacity="0.3"/></svg>',
-    'Plano Picado': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="40" y="25" width="240" height="130" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><ellipse cx="160" cy="120" rx="55" ry="22" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.35"/><path d="M130 120 L160 55 L190 120" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/></svg>',
-    'Plano Contrapicado': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="40" y="25" width="240" height="130" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><path d="M130 40 L160 135 L190 40" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><ellipse cx="160" cy="38" rx="55" ry="20" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.3"/></svg>',
-    'Plano Americano': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="50" y="20" width="220" height="140" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><ellipse cx="160" cy="60" rx="25" ry="28" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><path d="M115 140 Q135 95 160 88 Q185 95 205 140" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.35"/><line x1="115" y1="115" x2="205" y2="115" stroke="#e8d5a3" stroke-width="0.8" opacity="0.2" stroke-dasharray="4,4"/></svg>',
-    'Plano Sequência': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="15" width="280" height="150" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><path d="M40 140 Q80 80 120 100 Q160 120 200 70 Q240 30 280 90" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><circle cx="40" cy="140" r="4" fill="#e8d5a3" opacity="0.3"/><circle cx="280" cy="90" r="4" fill="#e8d5a3" opacity="0.3"/></svg>'
+    'Plano Geral': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="300" height="160" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.2"/><path d="M10 140 Q80 100 160 110 Q240 120 310 90" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.15"/><path d="M10 160 Q80 130 160 140 Q240 150 310 130" fill="none" stroke="#e8d5a3" stroke-width="0.8" opacity="0.1"/><ellipse cx="90" cy="95" rx="12" ry="14" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.3"/><path d="M78 125 Q84 105 90 102 Q96 105 102 125" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.25"/><ellipse cx="160" cy="98" rx="10" ry="12" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.25"/><path d="M150 125 Q155 108 160 105 Q165 108 170 125" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.2"/><ellipse cx="230" cy="100" rx="11" ry="13" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.28"/><path d="M219 128 Q224 110 230 107 Q236 110 241 128" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.22"/><line x1="10" y1="130" x2="310" y2="130" stroke="#e8d5a3" stroke-width="0.5" opacity="0.1"/></svg>',
+    'Plano Médio': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="60" y="20" width="200" height="140" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.2" opacity="0.25"/><ellipse cx="160" cy="68" rx="26" ry="30" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><circle cx="160" cy="58" r="14" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.35"/><path d="M112 145 Q130 98 160 93 Q190 98 208 145" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.35"/><line x1="130" y1="120" x2="190" y2="120" stroke="#e8d5a3" stroke-width="0.8" opacity="0.2" stroke-dasharray="4,4"/></svg>',
+    'Grande Plano': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="70" y="25" width="180" height="130" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.2" opacity="0.25"/><ellipse cx="160" cy="80" rx="55" ry="62" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><circle cx="160" cy="65" r="22" fill="none" stroke="#e8d5a3" stroke-width="1.2" opacity="0.5"/><line x1="138" y1="72" x2="182" y2="72" stroke="#e8d5a3" stroke-width="0.8" opacity="0.3"/><ellipse cx="148" cy="63" rx="6" ry="4" fill="none" stroke="#e8d5a3" stroke-width="0.8" opacity="0.4"/><ellipse cx="172" cy="63" rx="6" ry="4" fill="none" stroke="#e8d5a3" stroke-width="0.8" opacity="0.4"/><path d="M148 80 Q160 86 172 80" fill="none" stroke="#e8d5a3" stroke-width="0.8" opacity="0.3"/></svg>',
+    'Plano Detalhe': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="95" y="45" width="130" height="90" rx="2" fill="none" stroke="#e8d5a3" stroke-width="2" opacity="0.35"/><circle cx="160" cy="90" r="32" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><circle cx="160" cy="90" r="18" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.3"/><line x1="128" y1="90" x2="192" y2="90" stroke="#e8d5a3" stroke-width="1" opacity="0.3"/><line x1="160" y1="58" x2="160" y2="122" stroke="#e8d5a3" stroke-width="1" opacity="0.3"/><circle cx="160" cy="90" r="4" fill="#e8d5a3" opacity="0.2"/></svg>',
+    'Plano Picado': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="20" width="260" height="140" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.2" opacity="0.25"/><ellipse cx="160" cy="130" rx="65" ry="22" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><ellipse cx="160" cy="125" rx="20" ry="10" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.35"/><line x1="140" y1="125" x2="160" y2="50" stroke="#e8d5a3" stroke-width="1.2" opacity="0.35"/><line x1="180" y1="125" x2="160" y2="50" stroke="#e8d5a3" stroke-width="1.2" opacity="0.35"/><line x1="160" y1="125" x2="160" y2="50" stroke="#e8d5a3" stroke-width="0.8" opacity="0.2" stroke-dasharray="4,3"/><path d="M30 20 L160 10 L290 20" fill="none" stroke="#e8d5a3" stroke-width="0.8" opacity="0.15"/></svg>',
+    'Plano Contrapicado': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="20" width="260" height="140" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.2" opacity="0.25"/><ellipse cx="160" cy="50" rx="65" ry="22" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.3"/><ellipse cx="160" cy="55" rx="20" ry="10" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.35"/><line x1="140" y1="55" x2="160" y2="150" stroke="#e8d5a3" stroke-width="1.2" opacity="0.4"/><line x1="180" y1="55" x2="160" y2="150" stroke="#e8d5a3" stroke-width="1.2" opacity="0.4"/><line x1="160" y1="55" x2="160" y2="150" stroke="#e8d5a3" stroke-width="0.8" opacity="0.2" stroke-dasharray="4,3"/><path d="M30 160 L160 170 L290 160" fill="none" stroke="#e8d5a3" stroke-width="0.8" opacity="0.15"/></svg>',
+    'Plano Americano': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="55" y="15" width="210" height="150" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.2" opacity="0.25"/><ellipse cx="160" cy="58" rx="24" ry="27" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><circle cx="160" cy="48" r="13" fill="none" stroke="#e8d5a3" stroke-width="1" opacity="0.35"/><path d="M114 145 Q132 92 160 87 Q188 92 206 145" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.35"/><line x1="114" y1="118" x2="206" y2="118" stroke="#e8d5a3" stroke-width="1" opacity="0.2" stroke-dasharray="5,4"/><line x1="55" y1="118" x2="265" y2="118" stroke="#e8d5a3" stroke-width="0.5" opacity="0.15" stroke-dasharray="3,6"/></svg>',
+    'Plano Sequência': '<svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg"><rect x="15" y="15" width="290" height="150" rx="2" fill="none" stroke="#e8d5a3" stroke-width="1.2" opacity="0.25"/><path d="M40 140 Q70 80 110 100 Q150 120 190 70 Q230 30 280 90" fill="none" stroke="#e8d5a3" stroke-width="2" opacity="0.4"/><circle cx="40" cy="140" r="5" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><circle cx="280" cy="90" r="5" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/><circle cx="40" cy="140" r="2" fill="#e8d5a3" opacity="0.3"/><circle cx="280" cy="90" r="2" fill="#e8d5a3" opacity="0.3"/><path d="M274 84 L280 90 L274 96" fill="none" stroke="#e8d5a3" stroke-width="1.5" opacity="0.4"/></svg>'
   };
 
   function getSVGForScene(shotType) {
@@ -180,6 +221,50 @@
     document.getElementById('numScenes').selectedIndex = 1;
     document.getElementById('output').style.display = 'none';
     hideStatus();
+    currentScenes = [];
+  }
+
+  function startTimer() {
+    startTime = Date.now();
+    timerInterval = setInterval(function() {
+      var elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      document.getElementById('timerDisplay').textContent = elapsed + 's';
+    }, 100);
+  }
+
+  function stopTimer() {
+    clearInterval(timerInterval);
+    var elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+    return elapsed;
+  }
+
+  async function callGroq(prompt) {
+    var response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + GROQ_API_KEY
+      },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.8,
+        max_tokens: 3000
+      })
+    });
+    if (!response.ok) {
+      var errData = await response.json();
+      throw new Error(errData.error ? errData.error.message : 'Erro na API Groq');
+    }
+    var data = await response.json();
+    var rawText = data.choices[0].message.content;
+    var jsonText = rawText
+      .replace(/```json\n?/g, '').replace(/```\n?/g, '')
+      .replace(/[\u201C\u201D]/g, '"').replace(/[\u2018\u2019]/g, "'")
+      .trim();
+    var jsonMatch = jsonText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Resposta inválida — tenta novamente');
+    return JSON.parse(jsonMatch[0]);
   }
 
   async function generateStoryboard() {
@@ -189,71 +274,119 @@
 
     if (!narrative) { showStatus('error', 'Escreve uma narrativa primeiro.'); return; }
 
+    currentNarrative = narrative;
+    currentGenre = genre;
+
     var btn = document.getElementById('generateBtn');
     btn.disabled = true;
     document.getElementById('output').style.display = 'none';
-    showStatus('loading', 'A gerar storyboard com Groq AI...');
+    showStatus('loading', 'A gerar storyboard com IA...');
+    startTimer();
 
-    var prompt = 'És um especialista em storyboards cinematográficos. Cria um storyboard com exatamente ' + numScenes + ' cenas para o género "' + genre + '" baseado nesta narrativa: "' + narrative + '". Responde APENAS com JSON válido, sem markdown, sem backticks, sem texto extra. Usa este formato exato: {"titulo":"Título do Storyboard","cenas":[{"numero":1,"titulo":"Título da cena","descricao":"Descrição visual detalhada e específica para esta narrativa em 2 frases","tipo_plano":"Plano Geral","movimento_camara":"Fixo","transicao":"Corte","duracao":"5s","ambiente":"Descrição de luz e ambiente específica para esta cena"}]}. Tipos de plano permitidos: Plano Geral, Plano Médio, Grande Plano, Plano Detalhe, Plano Picado, Plano Contrapicado, Plano Americano. As descrições devem ser únicas e específicas para a narrativa fornecida. Cria exatamente ' + numScenes + ' cenas.';
+    var prompt = 'És um especialista em storyboards cinematográficos. Cria um storyboard com exatamente ' + numScenes + ' cenas para o género "' + genre + '" baseado nesta narrativa: "' + narrative + '". Responde APENAS com JSON válido, sem markdown, sem backticks, sem texto extra. Usa este formato exato: {"titulo":"Título do Storyboard","cenas":[{"numero":1,"titulo":"Título da cena","descricao":"Descrição visual detalhada e específica para esta narrativa em 2 frases","tipo_plano":"Plano Geral","movimento_camara":"Fixo","transicao":"Corte","duracao":"5s","ambiente":"Descrição de luz e ambiente específica para esta cena"}]}. Tipos de plano permitidos: Plano Geral, Plano Médio, Grande Plano, Plano Detalhe, Plano Picado, Plano Contrapicado, Plano Americano, Plano Sequência. As descrições devem ser únicas e específicas para a narrativa fornecida. Cria exatamente ' + numScenes + ' cenas.';
 
     try {
-      var response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + GROQ_API_KEY
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [{ role: 'user', content: prompt }],
-          temperature: 0.8,
-          max_tokens: 3000
-        })
-      });
-
-      if (!response.ok) {
-        var errData = await response.json();
-        throw new Error(errData.error ? errData.error.message : 'Erro na API Groq');
-      }
-
-      var data = await response.json();
-      var rawText = data.choices[0].message.content;
-      var jsonText = rawText
-  .replace(/```json\n?/g, '').replace(/```\n?/g, '')
-  .replace(/[\u201C\u201D]/g, '"')
-  .replace(/[\u2018\u2019]/g, "'")
-  .trim();
-      var jsonMatch = jsonText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('Resposta inválida — tenta novamente');
-
-      var parsed = JSON.parse(jsonMatch[0]);
+      var parsed = await callGroq(prompt);
       if (!parsed.cenas || !Array.isArray(parsed.cenas)) throw new Error('Formato inesperado — tenta novamente');
-
+      var elapsed = stopTimer();
+      currentScenes = parsed.cenas;
       hideStatus();
-      renderStoryboard(parsed, genre, narrative);
-
+      renderStoryboard(parsed, genre, narrative, elapsed);
     } catch (err) {
+      stopTimer();
       showStatus('error', 'Erro: ' + err.message);
     } finally {
       btn.disabled = false;
     }
   }
 
-  function renderStoryboard(data, genre, narrative) {
+  async function regenScene(index) {
+    var btn = document.querySelector('[data-regen="' + index + '"]');
+    if (btn) btn.disabled = true;
+
+    var prompt = 'És um especialista em storyboards cinematográficos. Gera UMA cena diferente (cena ' + (index + 1) + ') para um storyboard do género "' + currentGenre + '" baseado nesta narrativa: "' + currentNarrative + '". A cena deve ser diferente da versão anterior. Responde APENAS com JSON: {"numero":' + (index + 1) + ',"titulo":"Título da cena","descricao":"Descrição visual em 2 frases específica para esta narrativa","tipo_plano":"Plano Médio","movimento_camara":"Fixo","transicao":"Corte","duracao":"5s","ambiente":"Descrição de luz"}. Tipos de plano permitidos: Plano Geral, Plano Médio, Grande Plano, Plano Detalhe, Plano Picado, Plano Contrapicado, Plano Americano, Plano Sequência.';
+
+    try {
+      var parsed = await callGroq(prompt);
+      currentScenes[index] = parsed;
+      updateSceneCard(index, parsed);
+    } catch (err) {
+      console.error('Erro ao regenerar cena:', err);
+    } finally {
+      if (btn) btn.disabled = false;
+    }
+  }
+
+  function updateSceneCard(index, cena) {
+    var card = document.querySelector('[data-scene="' + index + '"]');
+    if (!card) return;
+    card.querySelector('.frame-drawing').innerHTML = getSVGForScene(cena.tipo_plano);
+    card.querySelector('.frame-shot-type').textContent = cena.tipo_plano || 'Plano';
+    card.querySelector('.scene-title').textContent = cena.titulo;
+    var descEl = card.querySelector('.scene-description');
+    descEl.textContent = cena.descricao;
+    var tags = card.querySelectorAll('.meta-tag');
+    if (tags[0]) tags[0].textContent = cena.transicao || '';
+    if (tags[1]) tags[1].textContent = cena.movimento_camara || '';
+    if (tags[2]) tags[2].textContent = cena.duracao || '';
+    var amb = card.querySelector('.scene-ambiente');
+    if (amb && cena.ambiente) amb.textContent = '💡 ' + cena.ambiente;
+    card.style.animation = 'none';
+    card.offsetHeight;
+    card.style.animation = 'fadeUp 0.4s ease both';
+  }
+
+  function makeDescEditable(el, index) {
+    var current = el.textContent;
+    var textarea = document.createElement('textarea');
+    textarea.className = 'scene-description editing';
+    textarea.value = current;
+    textarea.rows = 4;
+    el.replaceWith(textarea);
+    textarea.focus();
+
+    function save() {
+      var newText = textarea.value.trim() || current;
+      if (currentScenes[index]) currentScenes[index].descricao = newText;
+      var newEl = document.createElement('div');
+      newEl.className = 'scene-description';
+      newEl.textContent = newText;
+      newEl.title = 'Clica para editar';
+      newEl.onclick = function() { makeDescEditable(newEl, index); };
+      textarea.replaceWith(newEl);
+    }
+
+    textarea.onblur = save;
+    textarea.onkeydown = function(e) {
+      if (e.key === 'Escape') { textarea.value = current; save(); }
+    };
+  }
+
+  function renderStoryboard(data, genre, narrative, elapsed) {
     var grid = document.getElementById('storyboardGrid');
     var output = document.getElementById('output');
     var meta = document.getElementById('outputMeta');
+    var timeEl = document.getElementById('outputTime');
     var dateStr = new Date().toLocaleDateString('pt-PT');
 
     grid.innerHTML = '';
     meta.textContent = data.cenas.length + ' CENAS · ' + genre.toUpperCase() + ' · ' + dateStr;
+    if (elapsed) timeEl.textContent = '⚡ Gerado em ' + elapsed + 's';
     document.getElementById('printTitle').textContent = narrative.substring(0, 60) + (narrative.length > 60 ? '...' : '');
     document.getElementById('printMeta').textContent = data.cenas.length + ' cenas · ' + genre.toUpperCase() + ' · ' + dateStr;
 
     data.cenas.forEach(function(cena, i) {
       var card = document.createElement('div');
       card.className = 'scene-card';
+      card.setAttribute('data-scene', i);
       card.style.animationDelay = (i * 0.07) + 's';
+
+      var descEl = document.createElement('div');
+      descEl.className = 'scene-description';
+      descEl.textContent = cena.descricao;
+      descEl.title = 'Clica para editar';
+      descEl.onclick = function() { makeDescEditable(descEl, i); };
+
       card.innerHTML =
         '<div class="frame-visual">' +
           '<div class="frame-number">' + String(cena.numero).padStart(2,'0') + '</div>' +
@@ -261,15 +394,35 @@
           '<div class="frame-shot-type">' + (cena.tipo_plano || 'Plano') + '</div>' +
         '</div>' +
         '<div class="scene-info">' +
-          '<div class="scene-title">' + cena.titulo + '</div>' +
-          '<div class="scene-description">' + cena.descricao + '</div>' +
-          '<div class="scene-meta">' +
-            (cena.transicao ? '<span class="meta-tag tag-transition">' + cena.transicao + '</span>' : '') +
-            (cena.movimento_camara ? '<span class="meta-tag tag-camera">' + cena.movimento_camara + '</span>' : '') +
-            (cena.duracao ? '<span class="meta-tag tag-duration">' + cena.duracao + '</span>' : '') +
+          '<div class="scene-header">' +
+            '<div class="scene-title">' + cena.titulo + '</div>' +
+            '<button class="btn-regen" data-regen="' + i + '" onclick="regenScene(' + i + ')">↺ REGENERAR</button>' +
           '</div>' +
-          (cena.ambiente ? '<div class="scene-ambiente">💡 ' + cena.ambiente + '</div>' : '') +
         '</div>';
+
+      var info = card.querySelector('.scene-info');
+      info.appendChild(descEl);
+
+      var metaDiv = document.createElement('div');
+      metaDiv.className = 'scene-meta';
+      metaDiv.innerHTML =
+        (cena.transicao ? '<span class="meta-tag tag-transition">' + cena.transicao + '</span>' : '') +
+        (cena.movimento_camara ? '<span class="meta-tag tag-camera">' + cena.movimento_camara + '</span>' : '') +
+        (cena.duracao ? '<span class="meta-tag tag-duration">' + cena.duracao + '</span>' : '');
+      info.appendChild(metaDiv);
+
+      if (cena.ambiente) {
+        var ambDiv = document.createElement('div');
+        ambDiv.className = 'scene-ambiente';
+        ambDiv.textContent = '💡 ' + cena.ambiente;
+        info.appendChild(ambDiv);
+      }
+
+      var hintDiv = document.createElement('div');
+      hintDiv.className = 'edit-hint';
+      hintDiv.textContent = 'CLICA NA DESCRIÇÃO PARA EDITAR';
+      info.appendChild(hintDiv);
+
       grid.appendChild(card);
     });
 
@@ -281,7 +434,6 @@
     var el = document.getElementById('status');
     el.className = 'status ' + type;
     document.getElementById('statusText').textContent = msg;
-    document.getElementById('spinner').style.display = type === 'loading' ? 'block' : 'none';
   }
 
   function hideStatus() {
