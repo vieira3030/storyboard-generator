@@ -308,7 +308,7 @@
   var descAtual = cenaAtual ? cenaAtual.descricao : '';
   var tituloAtual = cenaAtual ? cenaAtual.titulo : '';
 
-  var prompt = 'És um especialista em storyboards cinematográficos. Gera UMA versão alternativa para esta cena de um storyboard do género "' + currentGenre + '" baseado na narrativa: "' + currentNarrative + '". A cena atual chama-se "' + tituloAtual + '" e tem esta descrição: "' + descAtual + '". Mantém o mesmo momento narrativo mas com ângulo, enquadramento ou abordagem visual diferente. Responde APENAS com JSON: {"numero":' + (index + 1) + ',"titulo":"Título ligeiramente diferente","descricao":"Descrição visual alternativa em 2 frases","tipo_plano":"Plano Médio","movimento_camara":"Fixo","transicao":"Corte","duracao":"5s","ambiente":"Descrição de luz"}. Tipos de plano permitidos: Plano Geral, Plano Médio, Grande Plano, Plano Detalhe, Plano Picado, Plano Contrapicado, Plano Americano, Plano Sequência.';
+ var prompt = 'És um especialista em storyboards cinematográficos. Gera UMA versão alternativa para esta cena de um storyboard do género "' + currentGenre + '" baseado na narrativa: "' + currentNarrative + '". A cena atual chama-se "' + tituloAtual + '" e tem esta descrição: "' + descAtual + '". Mantém o mesmo momento narrativo mas com ângulo, enquadramento ou abordagem visual completamente diferente. A descrição NÃO pode começar com "A câmara". Usa inícios variados como: o nome da personagem, o objeto em foco, a ação que acontece, o ambiente, a emoção. Responde APENAS com JSON: {"numero":' + (index + 1) + ',"titulo":"Título ligeiramente diferente","descricao":"Descrição visual alternativa em 2 frases","tipo_plano":"Plano Médio","movimento_camara":"Fixo","transicao":"Corte","duracao":"5s","ambiente":"Descrição de luz"}. Tipos de plano permitidos: Plano Geral, Plano Médio, Grande Plano, Plano Detalhe, Plano Picado, Plano Contrapicado, Plano Americano, Plano Sequência.';
 
   try {
     var parsed = await callGroq(prompt);
@@ -324,7 +324,7 @@
   function updateSceneCard(index, cena) {
     var card = document.querySelector('[data-scene="' + index + '"]');
     if (!card) return;
-    card.querySelector('.frame-drawing').innerHTML = getSVGForScene(cena.tipo_plano);
+   card.querySelector('.frame-drawing').innerHTML = getSVGForScene(cena.tipo_plano || 'Plano Médio');
     card.querySelector('.frame-shot-type').textContent = cena.tipo_plano || 'Plano';
     card.querySelector('.scene-title').textContent = cena.titulo;
     var descEl = card.querySelector('.scene-description');
